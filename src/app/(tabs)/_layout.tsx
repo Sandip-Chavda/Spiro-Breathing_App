@@ -1,6 +1,6 @@
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { BrainCircuit, User, Wind } from "lucide-react-native";
+import { Brain, User, Wind } from "lucide-react-native";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -31,7 +31,7 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
   });
 
   const icons: Record<string, any> = {
-    index: BrainCircuit,
+    index: Brain,
     breathe: Wind,
     profile: User,
   };
