@@ -3,3 +3,18 @@
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
+
+@theme {
+  /* 🎨 COLOR PALETTE TOKENS */
+  --color-spiroCyan: #00e5c9;
+  --color-deepKinetic: #00a896;
+  --color-vagusIndigo: #5f69ff;
+  --color-obsidianDark: #0a0d10;
+  --color-sleekSlate: #141a21;
+  --color-pureOxygen: #ffffff;
+  --color-mutedEther: #8a99ad;
+
+  /* 📋 TYPOGRAPHY ARCHITECTURE */
+  --font-jakarta: "PlusJakartaSans-SemiBold", "sans-serif";
+  --font-inter: "Inter-Regular", "sans-serif";
+}
