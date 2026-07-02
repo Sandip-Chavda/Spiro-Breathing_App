@@ -1,6 +1,7 @@
 import AmbientBackground from "@/components/AmbientBackground";
 import FluidBreathingView from "@/components/FluidBreathingView";
 import { SafeAreaView } from "@/components/SafeAreaview";
+import { useSessionStore } from "@/store/useSessionStore";
 import { Play, RotateCcw, Square } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -18,6 +19,19 @@ export default function BreatheScreen() {
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseIndexRef = useRef(0);
+
+  const addSession = useSessionStore((state) => state.addSession);
+
+  const saveCurrentSession = () => {
+    if (elapsedTime > 0) {
+      addSession({
+        id: Date.now().toString(),
+        patternName: "Box Breathing",
+        completedAt: new Date().toISOString(),
+        durationSeconds: elapsedTime,
+      });
+    }
+  };
 
   const totalRounds = 5;
   const pattern = {
@@ -51,6 +65,7 @@ export default function BreatheScreen() {
               setCurrentRound((prevRound) => {
                 if (prevRound + 1 > totalRounds) {
                   setIsRunning(false);
+                  saveCurrentSession(); // Save when all rounds complete naturally
                   return prevRound;
                 }
                 return prevRound + 1;
@@ -89,6 +104,7 @@ export default function BreatheScreen() {
   };
 
   const handleReset = () => {
+    saveCurrentSession(); // Save progress before wiping data
     setIsRunning(false);
     setPhase("idle");
     setTimeLeft(0);
