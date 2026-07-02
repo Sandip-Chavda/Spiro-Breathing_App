@@ -44,7 +44,7 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
       <View style={styles.contentWrapper}>
         <Animated.View style={[styles.activeBackground, animatedBgStyle]} />
         <Animated.View style={animatedIconStyle}>
-          <Icon size={24} color={color} strokeWidth={2.5} />
+          <Icon size={24} color={color} strokeWidth={1.8} />
         </Animated.View>
         <Text style={[styles.tabLabel, { color: color }]}>{label}</Text>
       </View>
