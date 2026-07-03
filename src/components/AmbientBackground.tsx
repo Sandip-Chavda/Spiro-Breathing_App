@@ -28,7 +28,7 @@ const Particle = ({ delay, duration, size, startX, color }: any) => {
     opacity.value = withDelay(
       delay,
       withRepeat(
-        withTiming(0.3, {
+        withTiming(0.35, {
           duration: duration / 2,
           easing: Easing.inOut(Easing.ease),
         }),
@@ -61,25 +61,25 @@ const Particle = ({ delay, duration, size, startX, color }: any) => {
 };
 
 export default function AmbientBackground({ phase }: { phase: string }) {
-  const bgColor = useSharedValue("#0A0D10");
+  const bgColor = useSharedValue("#F6F8FB");
 
   useEffect(() => {
-    // Fade the entire screen background based on the phase
+    // Fade the entire screen tint based on the phase
     if (phase === "inhale")
-      bgColor.value = withTiming("#00E5C9", { duration: 3000 });
+      bgColor.value = withTiming("#3E7EFF", { duration: 3000 });
     else if (phase === "exhale")
-      bgColor.value = withTiming("#00A896", { duration: 3000 });
+      bgColor.value = withTiming("#FF7A59", { duration: 3000 });
     else if (phase === "holdIn" || phase === "holdOut")
-      bgColor.value = withTiming("#5F69FF", { duration: 1500 });
-    else bgColor.value = withTiming("#0A0D10", { duration: 1000 });
+      bgColor.value = withTiming("#7C6FEF", { duration: 1500 });
+    else bgColor.value = withTiming("#F6F8FB", { duration: 1000 });
   }, [phase]);
 
   const bgStyle = useAnimatedStyle(() => ({
     backgroundColor: bgColor.value,
-    opacity: 0.08, // Keep the color very subtle so text remains readable
+    opacity: 0.07, // Keep the color very subtle so text remains readable
   }));
 
-  // Generate 20 randomized particles
+  // Generate 20 randomized drifting particles
   const particles = useMemo(() => {
     return Array.from({ length: 20 }).map((_, i) => ({
       id: i,
@@ -87,12 +87,12 @@ export default function AmbientBackground({ phase }: { phase: string }) {
       duration: 4000 + Math.random() * 4000,
       size: 4 + Math.random() * 8,
       startX: Math.random() * width,
-      color: Math.random() > 0.5 ? "#FFFFFF" : "#00E5C9",
+      color: Math.random() > 0.5 ? "#3E7EFF" : "#7C6FEF",
     }));
   }, []);
 
   return (
-    <View className="absolute top-0 left-0 right-0 bottom-0 bg-obsidianDark">
+    <View className="absolute top-0 left-0 right-0 bottom-0 bg-mistWhite">
       {/* Full screen fading color */}
       <Animated.View
         style={[{ flex: 1, width: "100%", height: "100%" }, bgStyle]}

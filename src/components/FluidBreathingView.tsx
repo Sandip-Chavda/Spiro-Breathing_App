@@ -31,7 +31,7 @@ export default function FluidBreathingView({
 }: FluidBreathingViewProps) {
   const scale = useSharedValue(1);
   const auraScale = useSharedValue(1);
-  const color = useSharedValue("#00E5C9");
+  const color = useSharedValue("#3E7EFF");
 
   // Use a ref so we can access the latest timeLeft inside the effect
   // without triggering the effect every 100ms tick
@@ -53,19 +53,22 @@ export default function FluidBreathingView({
     const durationMs = (timeLeftRef.current || 0) * 1000;
 
     if (phase === "inhale") {
+      // Cooling in — sky blue
       scale.value = withTiming(1.6, { duration: durationMs, easing });
       auraScale.value = withTiming(2.0, { duration: durationMs, easing });
-      color.value = withTiming("#00E5C9", { duration: durationMs / 2 });
+      color.value = withTiming("#3E7EFF", { duration: durationMs / 2 });
     } else if (phase === "exhale") {
+      // Warming out — ember coral
       scale.value = withTiming(1, { duration: durationMs, easing });
       auraScale.value = withTiming(1, { duration: durationMs, easing });
-      color.value = withTiming("#00A896", { duration: durationMs / 2 });
+      color.value = withTiming("#FF7A59", { duration: durationMs / 2 });
     } else if (phase === "holdIn" || phase === "holdOut") {
-      color.value = withTiming("#5F69FF", { duration: 500 });
+      // Stillness — dusk violet
+      color.value = withTiming("#7C6FEF", { duration: 500 });
     } else if (phase === "idle") {
       scale.value = withTiming(1, { duration: 500 });
       auraScale.value = withTiming(1, { duration: 500 });
-      color.value = withTiming("#00E5C9", { duration: 500 });
+      color.value = withTiming("#3E7EFF", { duration: 500 });
     }
   }, [phase, isRunning]); // Only trigger when phase changes or play/pause state changes
 
@@ -96,7 +99,7 @@ export default function FluidBreathingView({
             width: 140,
             height: 140,
             borderRadius: 70,
-            opacity: 0.15,
+            opacity: 0.18,
           },
           auraStyle,
         ]}
@@ -109,10 +112,10 @@ export default function FluidBreathingView({
             borderRadius: 70,
             alignItems: "center",
             justifyContent: "center",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.5,
-            shadowRadius: 30,
-            elevation: 15,
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.35,
+            shadowRadius: 24,
+            elevation: 10,
           },
           coreStyle,
         ]}

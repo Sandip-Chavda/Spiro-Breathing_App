@@ -1,6 +1,6 @@
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { Brain, User, Wind } from "lucide-react-native";
+import { Home, User, Wind } from "lucide-react-native";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -31,13 +31,13 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
   });
 
   const icons: Record<string, any> = {
-    index: Brain,
+    index: Home,
     breathe: Wind,
     profile: User,
   };
   const Icon = icons[iconName];
 
-  const color = isFocused ? "#00E5C9" : "#8A99AD";
+  const color = isFocused ? "#3E7EFF" : "#77879B";
 
   return (
     <Pressable onPress={onPress} style={styles.tabItem}>
@@ -56,13 +56,13 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
 const CustomTabBar = ({ state, navigation }: any) => {
   return (
     <View style={styles.tabBarContainer}>
-      <BlurView intensity={80} tint="dark" style={styles.blurView}>
+      <BlurView intensity={80} tint="light" style={styles.blurView}>
         <View style={styles.tabBarInner}>
           {state.routes.map((route: any, index: number) => {
             const isFocused = state.index === index;
 
             const config: Record<string, { label: string; icon: string }> = {
-              index: { label: "Diagnostics", icon: "index" },
+              index: { label: "Home", icon: "index" },
               breathe: { label: "Breathe", icon: "breathe" },
               profile: { label: "Profile", icon: "profile" },
             };
@@ -119,18 +119,18 @@ const styles = StyleSheet.create({
     right: 15,
     height: 70,
     borderRadius: 28,
-    shadowColor: "#000000",
+    shadowColor: "#16202E",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
   },
   blurView: {
     flex: 1,
     borderRadius: 28,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(22, 32, 46, 0.06)",
   },
   tabBarInner: {
     flex: 1,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     paddingHorizontal: 10,
     backgroundColor:
-      Platform.OS === "android" ? "rgba(10, 13, 16, 0.85)" : "transparent",
+      Platform.OS === "android" ? "rgba(255, 255, 255, 0.85)" : "transparent",
   },
   tabItem: {
     flex: 1,
@@ -162,9 +162,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 229, 201, 0.12)",
+    backgroundColor: "rgba(62, 126, 255, 0.10)",
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 201, 0.25)",
+    borderColor: "rgba(62, 126, 255, 0.22)",
   },
   tabLabel: {
     fontFamily: "Inter-Regular",

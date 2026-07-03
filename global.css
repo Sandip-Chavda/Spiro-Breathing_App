@@ -10,6 +10,7 @@
   --color-skyBlue: #3e7eff; /* Inhale phase, primary actions, active tab */
   --color-emberCoral: #ff7a59; /* Exhale phase, secondary accents */
   --color-duskViolet: #7c6fef; /* Hold phase, premium markers */
+  --color-holdTeal: #2fa8a0; /* Hold phase, premium markers — was duskViolet */
   --color-mistWhite: #f6f8fb; /* Global canvas background */
   --color-cloudPanel: #ffffff; /* Cards, inputs, modals */
   --color-inkNavy: #16202e; /* Primary text */

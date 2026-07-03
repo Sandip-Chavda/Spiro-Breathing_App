@@ -26,14 +26,14 @@ export default function RootLayout() {
   }
 
   return (
-    <View className="flex-1 bg-obsidianDark">
+    <View className="flex-1 bg-mistWhite">
       {/* Only passing the style prop here to fix the TS error */}
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: "#0A0D10" },
+          contentStyle: { backgroundColor: "#F6F8FB" },
         }}
       >
         <Stack.Screen name="index" />

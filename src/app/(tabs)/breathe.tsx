@@ -294,14 +294,14 @@ export default function BreatheScreen() {
 
   return (
     <SafeAreaView
-      className="flex-1 bg-obsidianDark"
+      className="flex-1 bg-mistWhite"
       edges={["top", "left", "right"]}
     >
       <AmbientBackground phase={phase} />
 
       <View className="flex-1 items-center justify-between pt-8 pb-32 px-6 relative z-10">
         <View className="w-full items-center mt-4">
-          <Text className="font-jakarta text-2xl font-bold text-pureOxygen mb-1">
+          <Text className="font-jakartaBold text-2xl font-bold text-inkNavy mb-1">
             {activePattern.name}
           </Text>
 
@@ -309,10 +309,10 @@ export default function BreatheScreen() {
             <>
               <Pressable
                 onPress={() => setIsModalVisible(true)}
-                className="flex-row items-center bg-sleekSlate px-3 py-1.5 rounded-full mt-2 mb-4"
+                className="flex-row items-center bg-skyBlue/10 border border-skyBlue/20 px-3 py-1.5 rounded-full mt-2 mb-4"
               >
-                <Settings size={14} color="#00E5C9" />
-                <Text className="font-inter text-xs text-spiroCyan ml-1.5 font-bold">
+                <Settings size={14} color="#3E7EFF" />
+                <Text className="font-inter text-xs text-skyBlue ml-1.5 font-bold">
                   Change Technique
                 </Text>
               </Pressable>
@@ -322,20 +322,20 @@ export default function BreatheScreen() {
                 {isPro && (
                   <Pressable
                     onPress={() => adjustRounds(-1)}
-                    className="w-10 h-10 rounded-full bg-sleekSlate items-center justify-center"
+                    className="w-10 h-10 rounded-full bg-cloudPanel border border-hairline items-center justify-center"
                   >
-                    <Minus size={20} color="#FFFFFF" />
+                    <Minus size={20} color="#16202E" />
                   </Pressable>
                 )}
-                <Text className="font-jakarta text-xl font-bold text-pureOxygen">
+                <Text className="font-jakartaBold text-xl font-bold text-inkNavy">
                   {activePattern.rounds} Rounds
                 </Text>
                 {isPro && (
                   <Pressable
                     onPress={() => adjustRounds(1)}
-                    className="w-10 h-10 rounded-full bg-sleekSlate items-center justify-center"
+                    className="w-10 h-10 rounded-full bg-cloudPanel border border-hairline items-center justify-center"
                   >
-                    <Plus size={20} color="#FFFFFF" />
+                    <Plus size={20} color="#16202E" />
                   </Pressable>
                 )}
               </View>
@@ -345,18 +345,18 @@ export default function BreatheScreen() {
           {hasStarted && (
             <View className="flex-row justify-center gap-12 mt-6">
               <View className="items-center">
-                <Text className="font-inter text-xs text-mutedEther mb-1 uppercase">
+                <Text className="font-inter text-xs text-driftGray mb-1 uppercase">
                   Round
                 </Text>
-                <Text className="font-jakarta text-xl font-bold text-pureOxygen">
+                <Text className="font-jakartaBold text-xl font-bold text-inkNavy">
                   {currentRound} / {activePattern.rounds}
                 </Text>
               </View>
               <View className="items-center">
-                <Text className="font-inter text-xs text-mutedEther mb-1 uppercase">
+                <Text className="font-inter text-xs text-driftGray mb-1 uppercase">
                   Time
                 </Text>
-                <Text className="font-jakarta text-xl font-bold text-pureOxygen">
+                <Text className="font-jakartaBold text-xl font-bold text-inkNavy">
                   {formatTime(elapsedTime)}
                 </Text>
               </View>
@@ -374,15 +374,15 @@ export default function BreatheScreen() {
             exhaleDuration={activePattern.exhale * 1000}
             holdOutDuration={activePattern.holdOut * 1000}
           >
-            <Text className="font-jakarta text-2xl font-bold text-pureOxygen text-center">
+            <Text className="font-jakartaBold text-2xl font-bold text-cloudPanel text-center">
               {phaseText}
             </Text>
             {timeLeft > 0 && (
-              <Text className="font-jakarta font-bold text-pureOxygen mt-2">
+              <Text className="font-jakartaBold font-bold text-cloudPanel mt-2">
                 <Text className="text-6xl">
                   {timeLeft.toFixed(1).split(".")[0]}
                 </Text>
-                <Text className="text-3xl text-pureOxygen/70">
+                <Text className="text-3xl text-cloudPanel/70">
                   .{timeLeft.toFixed(1).split(".")[1]}
                 </Text>
               </Text>
@@ -395,24 +395,31 @@ export default function BreatheScreen() {
             {hasStarted && !isComplete && (
               <Pressable
                 onPress={handleReset}
-                className="w-16 h-16 rounded-full items-center justify-center bg-sleekSlate border border-mutedEther/20"
+                className="w-16 h-16 rounded-full items-center justify-center bg-cloudPanel border border-hairline"
               >
-                <RotateCcw size={24} color="#8A99AD" />
+                <RotateCcw size={24} color="#77879B" />
               </Pressable>
             )}
 
             <Pressable
               onPress={handlePlayPause}
               disabled={isLockedForToday && !hasStarted} // Disable play if locked for the day
-              className={`w-20 h-20 rounded-full items-center justify-center ${isRunning ? "bg-vagusIndigo" : "bg-spiroCyan"} ${isLockedForToday && !hasStarted ? "opacity-30" : ""}`}
+              className={`w-20 h-20 rounded-full items-center justify-center ${isRunning ? "bg-duskViolet" : "bg-skyBlue"} ${isLockedForToday && !hasStarted ? "opacity-30" : ""}`}
+              style={{
+                shadowColor: isRunning ? "#7C6FEF" : "#3E7EFF",
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.35,
+                shadowRadius: 16,
+                elevation: 8,
+              }}
             >
               {isRunning ? (
                 <Square size={32} color="#FFFFFF" fill="#FFFFFF" />
               ) : (
                 <Play
                   size={32}
-                  color="#0A0D10"
-                  fill="#0A0D10"
+                  color="#FFFFFF"
+                  fill="#FFFFFF"
                   style={{ marginLeft: 4 }}
                 />
               )}
@@ -423,21 +430,23 @@ export default function BreatheScreen() {
 
       {/* Daily Limit Lock Overlay (Free Users) */}
       {isLockedForToday && !hasStarted && (
-        <View className="absolute inset-0 bg-obsidianDark/80 items-center justify-center z-20 px-8">
-          <View className="bg-sleekSlate border border-vagusIndigo/30 rounded-3xl p-8 items-center w-full">
-            <Lock size={40} color="#5F69FF" strokeWidth={2.5} />
-            <Text className="font-jakarta text-xl font-bold text-pureOxygen mt-4 mb-2">
+        <View className="absolute inset-0 bg-inkNavy/40 items-center justify-center z-20 px-8">
+          <View className="bg-cloudPanel border border-hairline rounded-3xl p-8 items-center w-full shadow-lg">
+            <View className="w-16 h-16 rounded-full bg-duskViolet/10 items-center justify-center">
+              <Lock size={32} color="#7C6FEF" strokeWidth={2.5} />
+            </View>
+            <Text className="font-jakartaBold text-xl font-bold text-inkNavy mt-4 mb-2">
               Daily Limit Reached
             </Text>
-            <Text className="font-inter text-mutedEther text-center mb-6">
+            <Text className="font-inter text-driftGray text-center mb-6">
               Free users can complete one session per day. Upgrade to Pro for
               unlimited daily breathing.
             </Text>
             <Pressable
               onPress={() => router.push("/(tabs)/profile")}
-              className="bg-spiroCyan rounded-2xl py-4 px-8 w-full items-center"
+              className="bg-skyBlue rounded-2xl py-4 px-8 w-full items-center"
             >
-              <Text className="font-jakarta text-lg font-bold text-obsidianDark">
+              <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
                 Upgrade to Pro
               </Text>
             </Pressable>
@@ -446,36 +455,36 @@ export default function BreatheScreen() {
       )}
 
       {isComplete && (
-        <View className="absolute inset-0 bg-obsidianDark/90 items-center justify-center z-20 px-8">
+        <View className="absolute inset-0 bg-inkNavy/40 items-center justify-center z-20 px-8">
           <Animated.View
             style={[popupStyle]}
-            className="bg-sleekSlate border border-spiroCyan/30 rounded-3xl p-8 items-center w-full"
+            className="bg-cloudPanel border border-hairline rounded-3xl p-8 items-center w-full shadow-lg"
           >
-            <View className="w-20 h-20 rounded-full bg-spiroCyan/10 items-center justify-center mb-4">
-              <Check size={40} color="#00E5C9" strokeWidth={3} />
+            <View className="w-20 h-20 rounded-full bg-skyBlue/10 items-center justify-center mb-4">
+              <Check size={40} color="#3E7EFF" strokeWidth={3} />
             </View>
-            <Text className="font-jakarta text-2xl font-bold text-pureOxygen mb-2">
+            <Text className="font-jakartaBold text-2xl font-bold text-inkNavy mb-2">
               Session Complete!
             </Text>
-            <Text className="font-inter text-mutedEther text-center mb-6">
+            <Text className="font-inter text-driftGray text-center mb-6">
               You successfully completed {currentRound} rounds of{" "}
               {activePattern.name}.
             </Text>
 
             <View className="flex-row gap-4 mb-8">
-              <View className="bg-obsidianDark px-5 py-3 rounded-xl items-center">
-                <Text className="font-inter text-xs text-mutedEther uppercase">
+              <View className="bg-mistWhite px-5 py-3 rounded-xl items-center">
+                <Text className="font-inter text-xs text-driftGray uppercase">
                   Time
                 </Text>
-                <Text className="font-jakarta text-xl font-bold text-spiroCyan">
+                <Text className="font-jakartaBold text-xl font-bold text-skyBlue">
                   {formatTime(elapsedTime)}
                 </Text>
               </View>
-              <View className="bg-obsidianDark px-5 py-3 rounded-xl items-center">
-                <Text className="font-inter text-xs text-mutedEther uppercase">
+              <View className="bg-mistWhite px-5 py-3 rounded-xl items-center">
+                <Text className="font-inter text-xs text-driftGray uppercase">
                   Rounds
                 </Text>
-                <Text className="font-jakarta text-xl font-bold text-spiroCyan">
+                <Text className="font-jakartaBold text-xl font-bold text-skyBlue">
                   {currentRound}
                 </Text>
               </View>
@@ -483,9 +492,9 @@ export default function BreatheScreen() {
 
             <Pressable
               onPress={handleReset}
-              className="bg-spiroCyan rounded-2xl py-4 px-8 w-full items-center"
+              className="bg-skyBlue rounded-2xl py-4 px-8 w-full items-center"
             >
-              <Text className="font-jakarta text-lg font-bold text-obsidianDark">
+              <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
                 Done
               </Text>
             </Pressable>
@@ -494,19 +503,19 @@ export default function BreatheScreen() {
       )}
 
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-obsidianDark border-t border-mutedEther/20 rounded-t-3xl p-6 pb-12 max-h-[90%]">
+        <View className="flex-1 justify-end bg-inkNavy/40">
+          <View className="bg-mistWhite border-t border-hairline rounded-t-3xl p-6 pb-12 max-h-[90%]">
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="font-jakarta text-xl font-bold text-pureOxygen">
+              <Text className="font-jakartaBold text-xl font-bold text-inkNavy">
                 Breathing Techniques
               </Text>
               <Pressable onPress={() => setIsModalVisible(false)}>
-                <X size={24} color="#8A99AD" />
+                <X size={24} color="#77879B" />
               </Pressable>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
+              <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
                 Presets
               </Text>
               <View className="gap-3 mb-6">
@@ -517,13 +526,13 @@ export default function BreatheScreen() {
                       key={p.name}
                       onPress={() => !isLocked && handleSelectPattern(p)}
                       disabled={isLocked}
-                      className={`p-4 rounded-2xl border flex-row justify-between items-center ${activePattern.name === p.name ? "bg-spiroCyan/10 border-spiroCyan" : "bg-sleekSlate border-mutedEther/10"} ${isLocked ? "opacity-50" : ""}`}
+                      className={`p-4 rounded-2xl border flex-row justify-between items-center ${activePattern.name === p.name ? "bg-skyBlue/10 border-skyBlue" : "bg-cloudPanel border-hairline"} ${isLocked ? "opacity-50" : ""}`}
                     >
                       <View>
-                        <Text className="font-jakarta text-base font-bold text-pureOxygen">
+                        <Text className="font-jakartaBold text-base font-bold text-inkNavy">
                           {p.name}
                         </Text>
-                        <Text className="font-inter text-xs text-mutedEther mt-1">
+                        <Text className="font-inter text-xs text-driftGray mt-1">
                           {p.inhale}s in{" "}
                           {p.holdIn > 0 ? `- ${p.holdIn}s hold` : ""} -{" "}
                           {p.exhale}s out{" "}
@@ -531,7 +540,7 @@ export default function BreatheScreen() {
                           {p.rounds} rounds
                         </Text>
                       </View>
-                      {isLocked && <Lock size={20} color="#5F69FF" />}
+                      {isLocked && <Lock size={20} color="#7C6FEF" />}
                     </Pressable>
                   );
                 })}
@@ -540,23 +549,23 @@ export default function BreatheScreen() {
               {/* Saved Custom Routines (Pro Feature) */}
               {isPro && savedCustomRoutines.length > 0 && (
                 <>
-                  <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
+                  <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
                     My Saved Routines
                   </Text>
                   <View className="gap-3 mb-6">
                     {savedCustomRoutines.map((r) => (
                       <View
                         key={r.id}
-                        className="p-4 rounded-2xl border bg-sleekSlate border-mutedEther/10 flex-row justify-between items-center"
+                        className="p-4 rounded-2xl border bg-cloudPanel border-hairline flex-row justify-between items-center"
                       >
                         <Pressable
                           onPress={() => handleSelectPattern(r)}
                           className="flex-1"
                         >
-                          <Text className="font-jakarta text-base font-bold text-pureOxygen">
+                          <Text className="font-jakartaBold text-base font-bold text-inkNavy">
                             {r.name}
                           </Text>
-                          <Text className="font-inter text-xs text-mutedEther mt-1">
+                          <Text className="font-inter text-xs text-driftGray mt-1">
                             {r.inhale}s in - {r.exhale}s out • {r.rounds} rounds
                           </Text>
                         </Pressable>
@@ -564,7 +573,7 @@ export default function BreatheScreen() {
                           onPress={() => r.id && deleteCustomRoutine(r.id)}
                           className="ml-4"
                         >
-                          <X size={20} color="#5F69FF" />
+                          <X size={20} color="#7C6FEF" />
                         </Pressable>
                       </View>
                     ))}
@@ -574,26 +583,26 @@ export default function BreatheScreen() {
 
               {/* Custom Builder with Pro Lock Overlay */}
               <View className="relative">
-                <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
+                <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
                   Create Custom
                 </Text>
-                <View className="bg-sleekSlate p-4 rounded-2xl border border-mutedEther/10 gap-4">
+                <View className="bg-cloudPanel p-4 rounded-2xl border border-hairline gap-4">
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">
+                    <Text className="font-inter text-inkNavy">
                       Routine Name
                     </Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 140,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       placeholder="My Routine"
-                      placeholderTextColor="#8A99AD"
+                      placeholderTextColor="#77879B"
                       value={customPattern.name}
                       onChangeText={(text) =>
                         setCustomPattern((prev) => ({ ...prev, name: text }))
@@ -602,17 +611,17 @@ export default function BreatheScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">
+                    <Text className="font-inter text-inkNavy">
                       Inhale (sec)
                     </Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 64,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       keyboardType="decimal-pad"
@@ -624,17 +633,17 @@ export default function BreatheScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">
+                    <Text className="font-inter text-inkNavy">
                       Hold In (sec)
                     </Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 64,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       keyboardType="decimal-pad"
@@ -646,17 +655,17 @@ export default function BreatheScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">
+                    <Text className="font-inter text-inkNavy">
                       Exhale (sec)
                     </Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 64,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       keyboardType="decimal-pad"
@@ -668,17 +677,17 @@ export default function BreatheScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">
+                    <Text className="font-inter text-inkNavy">
                       Hold Out (sec)
                     </Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 64,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       keyboardType="decimal-pad"
@@ -690,15 +699,15 @@ export default function BreatheScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-pureOxygen">Rounds</Text>
+                    <Text className="font-inter text-inkNavy">Rounds</Text>
                     <TextInput
                       style={{
-                        backgroundColor: "#0A0D10",
+                        backgroundColor: "#F6F8FB",
                         width: 64,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 8,
-                        color: "#FFFFFF",
+                        color: "#16202E",
                         textAlign: "center",
                       }}
                       keyboardType="numeric"
@@ -715,15 +724,15 @@ export default function BreatheScreen() {
                 {!isPro && (
                   <View className="absolute inset-0 rounded-2xl overflow-hidden">
                     <BlurView
-                      intensity={100}
-                      tint="systemThickMaterialDark"
+                      intensity={85}
+                      tint="systemChromeMaterialLight"
                       className="flex-1 items-center justify-center p-8"
                     >
-                      <Lock size={32} color="#5F69FF" />
-                      <Text className="font-jakarta text-lg font-bold text-pureOxygen mt-4 mb-2">
+                      <Lock size={32} color="#7C6FEF" />
+                      <Text className="font-jakartaBold text-lg font-bold text-inkNavy mt-4 mb-2">
                         Pro Feature
                       </Text>
-                      <Text className="font-inter text-sm text-mutedEther text-center">
+                      <Text className="font-inter text-sm text-driftGray text-center">
                         Upgrade to Pro to create and save your own custom
                         breathing routines.
                       </Text>
@@ -735,9 +744,9 @@ export default function BreatheScreen() {
               {isPro && (
                 <Pressable
                   onPress={handleSaveCustom}
-                  className="bg-spiroCyan rounded-2xl py-4 mt-6 items-center"
+                  className="bg-skyBlue rounded-2xl py-4 mt-6 items-center"
                 >
-                  <Text className="font-jakarta text-lg font-bold text-obsidianDark">
+                  <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
                     Save & Use Custom
                   </Text>
                 </Pressable>

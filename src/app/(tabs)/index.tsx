@@ -1,124 +1,149 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
-import { Activity, Heart, Sparkles } from "lucide-react-native";
-import { useState } from "react";
+import { useSessionStore } from "@/store/useSessionStore";
+import { useRouter } from "expo-router";
 import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+  ArrowRight,
+  Flame,
+  Lock,
+  Moon,
+  Sparkles,
+  Wind,
+} from "lucide-react-native";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 
-export default function DiagnosticsScreen() {
-  const [stressLevel, setStressLevel] = useState(5);
-  const [moodText, setMoodText] = useState("");
+const QUICK_TECHNIQUES = [
+  {
+    name: "Box Breathing",
+    blurb: "4-4-4-4",
+    icon: Wind,
+  },
+  {
+    name: "4-7-8 Relaxing",
+    blurb: "Wind down",
+    icon: Moon,
+  },
+  {
+    name: "Coherent",
+    blurb: "5-5 · Grounding",
+    icon: Sparkles,
+  },
+];
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const currentStreak = useSessionStore((state) => state.currentStreak);
+  const lastActiveDate = useSessionStore((state) => state.lastActiveDate);
+  const userRole = useSessionStore((state) => state.userRole);
+  const sessions = useSessionStore((state) => state.sessions);
+
+  const isPro = userRole === "premium_tier";
+  const today = new Date().toISOString().split("T")[0];
+  const isLockedForToday = !isPro && lastActiveDate === today;
+  const lastSession = sessions[0];
 
   return (
     <SafeAreaView
-      className="flex-1 bg-obsidianDark"
+      className="flex-1 bg-mistWhite"
       edges={["top", "left", "right"]}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1"
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: Platform.OS === "android" ? 40 : 24,
+          paddingBottom: 140,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header row: greeting + streak badge */}
+        <View className="flex-row items-center justify-between mb-1">
+          <Text className="font-inter text-sm text-driftGray">
+            {getGreeting()}
+          </Text>
+          {currentStreak > 0 && (
+            <View className="flex-row items-center bg-emberCoral/10 px-3 py-1 rounded-full">
+              <Flame size={14} color="#FF7A59" strokeWidth={2.5} />
+              <Text className="font-jakartaBold text-xs font-bold text-emberCoral ml-1">
+                {currentStreak} day{currentStreak > 1 ? "s" : ""}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <Text className="font-jakartaBold text-3xl font-bold text-inkNavy mb-8">
+          Ready to breathe?
+        </Text>
+
+        {/* Hero CTA */}
+        <Pressable
+          onPress={() => router.push("/(tabs)/breathe")}
+          className="bg-skyBlue rounded-3xl p-6 mb-10"
+          style={{
+            shadowColor: "#3E7EFF",
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.28,
+            shadowRadius: 20,
+            elevation: 8,
+          }}
         >
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{
-              paddingHorizontal: 24,
-              paddingTop: Platform.OS === "android" ? 40 : 20,
-              paddingBottom: 140, // FIX: Large padding to clear the floating tab bar and keyboard
-            }}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled" // Allows clicking the button without dismissing keyboard first
-          >
-            {/* Header */}
-            <Text className="font-jakarta text-3xl font-bold text-pureOxygen">
-              Diagnostics
+          <View className="w-12 h-12 rounded-full bg-cloudPanel/20 items-center justify-center mb-6">
+            {isLockedForToday ? (
+              <Lock size={22} color="#FFFFFF" />
+            ) : (
+              <Wind size={22} color="#FFFFFF" />
+            )}
+          </View>
+          <Text className="font-jakartaBold text-2xl font-bold text-cloudPanel mb-1">
+            Begin Session
+          </Text>
+          <Text className="font-inter text-sm text-cloudPanel/80 mb-6">
+            {lastSession
+              ? `Continue with ${lastSession.patternName}`
+              : "Start your first breathing cycle"}
+          </Text>
+          <View className="flex-row items-center">
+            <Text className="font-jakartaBold text-sm font-bold text-cloudPanel">
+              {isLockedForToday ? "Unlock a bonus round" : "Start now"}
             </Text>
-            <Text className="font-inter text-sm text-mutedEther mt-1 mb-8">
-              Input your current telemetry to generate a routine.
-            </Text>
+            <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+          </View>
+        </Pressable>
 
-            {/* Stress Level Slider */}
-            <View className="bg-sleekSlate rounded-2xl p-5 mb-6 border border-mutedEther/10">
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="font-jakarta text-base text-pureOxygen">
-                  Stress Level
-                </Text>
-                <Text className="font-jakarta text-lg font-bold text-spiroCyan">
-                  {stressLevel}/10
-                </Text>
+        {/* Quick Start — horizontal chip scroller, visually distinct from Profile's list rows */}
+        <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
+          Quick Start
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 12, paddingRight: 24 }}
+        >
+          {QUICK_TECHNIQUES.map((t) => (
+            <Pressable
+              key={t.name}
+              onPress={() => router.push("/(tabs)/breathe")}
+              className="bg-cloudPanel rounded-2xl p-4 border border-hairline items-start"
+              style={{ width: 128 }}
+            >
+              <View className="w-10 h-10 rounded-full bg-skyBlue/10 items-center justify-center mb-3">
+                <t.icon size={18} color="#3E7EFF" strokeWidth={2.5} />
               </View>
-
-              <View className="flex-row justify-between items-center mt-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <Pressable
-                    key={num}
-                    onPress={() => setStressLevel(num)}
-                    className={`w-6 h-6 rounded-md items-center justify-center ${stressLevel >= num ? "bg-deepKinetic" : "bg-obsidianDark"}`}
-                  >
-                    <Text
-                      className={`font-inter text-xs ${stressLevel >= num ? "text-pureOxygen" : "text-mutedEther"}`}
-                    >
-                      {num}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {/* Heart Rate Input */}
-            <View className="bg-sleekSlate rounded-2xl p-5 mb-6 border border-mutedEther/10">
-              <View className="flex-row items-center mb-3">
-                <Heart size={20} color="#5F69FF" strokeWidth={2.5} />
-                <Text className="font-jakarta text-base text-pureOxygen ml-3">
-                  Heart Rate (BPM)
-                </Text>
-              </View>
-              <TextInput
-                className="bg-obsidianDark rounded-xl p-4 text-pureOxygen font-inter text-lg"
-                keyboardType="numeric"
-                placeholder="e.g., 75"
-                placeholderTextColor="#8A99AD"
-              />
-            </View>
-
-            {/* Mood Journal Input */}
-            <View className="bg-sleekSlate rounded-2xl p-5 mb-8 border border-mutedEther/10">
-              <View className="flex-row items-center mb-3">
-                <Activity size={20} color="#00E5C9" strokeWidth={2.5} />
-                <Text className="font-jakarta text-base text-pureOxygen ml-3">
-                  Emotional Data Log
-                </Text>
-              </View>
-              <TextInput
-                className="bg-obsidianDark rounded-xl p-4 text-pureOxygen font-inter text-base min-h-[100px]"
-                multiline
-                textAlignVertical="top"
-                placeholder="Describe how you feel right now..."
-                placeholderTextColor="#8A99AD"
-                value={moodText}
-                onChangeText={setMoodText}
-              />
-            </View>
-
-            {/* Generate Button */}
-            <Pressable className="bg-spiroCyan rounded-2xl py-5 items-center justify-center flex-row active:bg-deepKinetic">
-              <Sparkles size={20} color="#0A0D10" strokeWidth={2} />
-              <Text className="font-jakarta text-lg font-bold text-obsidianDark ml-2">
-                Generate AI Breath Formula
+              <Text className="font-jakartaBold text-sm font-bold text-inkNavy">
+                {t.name}
+              </Text>
+              <Text className="font-inter text-xs text-driftGray mt-0.5">
+                {t.blurb}
               </Text>
             </Pressable>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+          ))}
+        </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }

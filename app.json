@@ -6,13 +6,13 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "spiro",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0A0D10",
+        "backgroundColor": "#F6F8FB",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -24,20 +24,20 @@
       "favicon": "./assets/images/favicon.png"
     },
     "androidStatusBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#0A0D10",
+      "barStyle": "dark-content",
+      "backgroundColor": "#F6F8FB",
       "translucent": true
     },
     "androidNavigationBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#0A0D10"
+      "barStyle": "dark-content",
+      "backgroundColor": "#F6F8FB"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0A0D10",
+          "backgroundColor": "#F6F8FB",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }

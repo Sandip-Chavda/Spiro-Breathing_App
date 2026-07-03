@@ -79,12 +79,11 @@ export default function ProfileScreen() {
     }));
   }, [sessions]);
 
-  // const chartWidth = Dimensions.get("window").width - 80;
   const chartWidth = Dimensions.get("window").width - 72;
 
   return (
     <SafeAreaView
-      className="flex-1 bg-obsidianDark"
+      className="flex-1 bg-mistWhite"
       edges={["top", "left", "right"]}
     >
       <ScrollView
@@ -96,108 +95,38 @@ export default function ProfileScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="font-jakarta text-3xl font-bold text-pureOxygen">
+        <Text className="font-jakartaBold text-3xl font-bold text-inkNavy">
           Your Progress
         </Text>
-        <Text className="font-inter text-sm text-mutedEther mt-1 mb-8">
+        <Text className="font-inter text-sm text-driftGray mt-1 mb-8">
           Track your parasympathetic consistency.
         </Text>
 
         <View className="flex-row gap-4 mb-8">
-          <View className="flex-1 bg-sleekSlate rounded-2xl p-5 border border-mutedEther/10 items-center">
-            <Flame size={28} color="#00E5C9" strokeWidth={2.5} />
-            <Text className="font-jakarta text-3xl font-bold text-pureOxygen mt-2">
+          <View className="flex-1 bg-cloudPanel rounded-2xl p-5 border border-hairline items-center">
+            <Flame size={28} color="#FF7A59" strokeWidth={2.5} />
+            <Text className="font-jakartaBold text-3xl font-bold text-inkNavy mt-2">
               {currentStreak}
             </Text>
-            <Text className="font-inter text-xs text-mutedEther uppercase mt-1">
+            <Text className="font-inter text-xs text-driftGray uppercase mt-1">
               Day Streak
             </Text>
           </View>
-          <View className="flex-1 bg-sleekSlate rounded-2xl p-5 border border-mutedEther/10 items-center">
-            <Clock size={28} color="#5F69FF" strokeWidth={2.5} />
-            <Text className="font-jakarta text-lg font-bold text-pureOxygen mt-2 text-center">
+          <View className="flex-1 bg-cloudPanel rounded-2xl p-5 border border-hairline items-center">
+            <Clock size={28} color="#7C6FEF" strokeWidth={2.5} />
+            <Text className="font-jakartaBold text-lg font-bold text-inkNavy mt-2 text-center">
               {formatTotalTime(totalSeconds)}
             </Text>
-            <Text className="font-inter text-xs text-mutedEther uppercase mt-1">
+            <Text className="font-inter text-xs text-driftGray uppercase mt-1">
               Total Time
             </Text>
           </View>
         </View>
 
-        {/* <Text className="font-jakarta text-lg font-bold text-pureOxygen mb-3">
+        <Text className="font-jakartaBold text-lg font-bold text-inkNavy mb-3">
           Consistency Graph
         </Text>
-        <View className="bg-sleekSlate rounded-2xl p-4 border border-mutedEther/10 mb-8">
-          <ContributionGraph
-            values={heatmapValues}
-            endDate={new Date()}
-            numDays={105}
-            width={chartWidth}
-            height={170}
-            weekStartsOn={1}
-            cellSize={12}
-            gutterSize={4}
-            showMonthLabels
-            showWeekdayLabels
-            theme="dark"
-            emptyColor="#1E2632"
-            colors={["#0E4442", "#11756F", "#00B8A7", "#00E5C9"]}
-            onDayPress={(day) => console.log(day)}
-          />
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Text style={{ fontSize: 12, color: "#8A99AD", marginRight: 8 }}>
-              Less
-            </Text>
-            <View
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 2,
-                backgroundColor: "#1E2632",
-                marginRight: 4,
-              }}
-            />
-            <View
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 2,
-                backgroundColor: "#003833",
-                marginRight: 4,
-              }}
-            />
-            <View
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 2,
-                backgroundColor: "#00756A",
-                marginRight: 4,
-              }}
-            />
-            <View
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 2,
-                backgroundColor: "#00E5C9",
-                marginRight: 8,
-              }}
-            />
-            <Text style={{ fontSize: 12, color: "#8A99AD" }}>More</Text>
-          </View>
-        </View> */}
-
-        <Text className="font-jakarta text-lg font-bold text-pureOxygen mb-3">
-          Consistency Graph
-        </Text>
-        <View className="bg-sleekSlate rounded-2xl p-4 border border-mutedEther/10 mb-8 relative">
+        <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-8 relative">
           {/* Generate dummy data for free users to show behind the blur */}
           <ContributionGraph
             values={isPro ? heatmapValues : dummyHeatmapValues}
@@ -210,9 +139,8 @@ export default function ProfileScreen() {
             gutterSize={4}
             showMonthLabels
             showWeekdayLabels
-            theme="dark"
-            emptyColor="#1E2632"
-            colors={["#0E4442", "#11756F", "#00B8A7", "#00E5C9"]}
+            emptyColor="#EDF1F7"
+            colors={["#DCE7FF", "#AEC7FF", "#6FA0FF", "#3E7EFF"]}
             onDayPress={(day) => console.log(day)}
           />
 
@@ -220,23 +148,23 @@ export default function ProfileScreen() {
           {!isPro && (
             <View className="absolute inset-0 rounded-2xl overflow-hidden">
               <BlurView
-                intensity={100}
-                tint="systemThickMaterialDark"
+                intensity={90}
+                tint="systemChromeMaterialLight"
                 className="flex-1 items-center justify-center p-8"
               >
-                <Lock size={32} color="#00E5C9" />
-                <Text className="font-jakarta text-lg font-bold text-pureOxygen mt-4 mb-2">
+                <Lock size={32} color="#3E7EFF" />
+                <Text className="font-jakartaBold text-lg font-bold text-inkNavy mt-4 mb-2">
                   Unlock Your Progress
                 </Text>
-                <Text className="font-inter text-sm text-mutedEther text-center mb-6">
+                <Text className="font-inter text-sm text-driftGray text-center mb-6">
                   Upgrade to Pro to track your daily consistency and session
                   history.
                 </Text>
                 <Pressable
                   onPress={upgradeToPro}
-                  className="bg-spiroCyan rounded-xl py-3 px-6"
+                  className="bg-skyBlue rounded-xl py-3 px-6"
                 >
-                  <Text className="font-jakarta text-base font-bold text-obsidianDark">
+                  <Text className="font-jakartaBold text-base font-bold text-cloudPanel">
                     Upgrade to Pro
                   </Text>
                 </Pressable>
@@ -251,9 +179,10 @@ export default function ProfileScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "flex-end",
+                marginTop: 8,
               }}
             >
-              <Text style={{ fontSize: 12, color: "#8A99AD", marginRight: 8 }}>
+              <Text style={{ fontSize: 12, color: "#77879B", marginRight: 8 }}>
                 Less
               </Text>
               <View
@@ -261,7 +190,7 @@ export default function ProfileScreen() {
                   width: 12,
                   height: 12,
                   borderRadius: 2,
-                  backgroundColor: "#1E2632",
+                  backgroundColor: "#EDF1F7",
                   marginRight: 4,
                 }}
               />
@@ -270,7 +199,7 @@ export default function ProfileScreen() {
                   width: 12,
                   height: 12,
                   borderRadius: 2,
-                  backgroundColor: "#003833",
+                  backgroundColor: "#DCE7FF",
                   marginRight: 4,
                 }}
               />
@@ -279,7 +208,7 @@ export default function ProfileScreen() {
                   width: 12,
                   height: 12,
                   borderRadius: 2,
-                  backgroundColor: "#00756A",
+                  backgroundColor: "#6FA0FF",
                   marginRight: 4,
                 }}
               />
@@ -288,11 +217,11 @@ export default function ProfileScreen() {
                   width: 12,
                   height: 12,
                   borderRadius: 2,
-                  backgroundColor: "#00E5C9",
+                  backgroundColor: "#3E7EFF",
                   marginRight: 8,
                 }}
               />
-              <Text style={{ fontSize: 12, color: "#8A99AD" }}>More</Text>
+              <Text style={{ fontSize: 12, color: "#77879B" }}>More</Text>
             </View>
           )}
         </View>
@@ -301,9 +230,9 @@ export default function ProfileScreen() {
         {!isPro && (
           <Pressable
             onPress={upgradeToPro}
-            className="bg-vagusIndigo rounded-2xl py-4 px-8 w-full items-center mb-8"
+            className="bg-duskViolet rounded-2xl py-4 px-8 w-full items-center mb-8"
           >
-            <Text className="font-jakarta text-lg font-bold text-pureOxygen">
+            <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
               Upgrade to Pro (Test)
             </Text>
           </Pressable>
@@ -311,14 +240,14 @@ export default function ProfileScreen() {
 
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center">
-            <History size={18} color="#8A99AD" strokeWidth={2.5} />
-            <Text className="font-jakarta text-lg font-bold text-pureOxygen ml-2">
+            <History size={18} color="#77879B" strokeWidth={2.5} />
+            <Text className="font-jakartaBold text-lg font-bold text-inkNavy ml-2">
               History Log
             </Text>
           </View>
           {sessions.length > 0 && (
             <Pressable onPress={clearHistory}>
-              <Text className="font-inter text-xs text-mutedEther underline">
+              <Text className="font-inter text-xs text-driftGray underline">
                 Clear All
               </Text>
             </Pressable>
@@ -326,8 +255,8 @@ export default function ProfileScreen() {
         </View>
 
         {sessions.length === 0 ? (
-          <View className="bg-sleekSlate rounded-2xl p-8 border border-mutedEther/10 items-center">
-            <Text className="font-inter text-mutedEther text-center">
+          <View className="bg-cloudPanel rounded-2xl p-8 border border-hairline items-center">
+            <Text className="font-inter text-driftGray text-center">
               No sessions logged yet. Complete a breathing cycle to see your
               history here!
             </Text>
@@ -337,18 +266,18 @@ export default function ProfileScreen() {
             {sessions.map((session) => (
               <View
                 key={session.id}
-                className="bg-sleekSlate rounded-2xl p-4 border border-mutedEther/10 flex-row justify-between items-center"
+                className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row justify-between items-center"
               >
                 <View>
-                  <Text className="font-jakarta text-base font-bold text-pureOxygen">
+                  <Text className="font-jakartaBold text-base font-bold text-inkNavy">
                     {session.patternName}
                   </Text>
-                  <Text className="font-inter text-xs text-mutedEther mt-1">
+                  <Text className="font-inter text-xs text-driftGray mt-1">
                     {formatDate(session.completedAt)}
                   </Text>
                 </View>
-                <View className="bg-obsidianDark px-3 py-2 rounded-lg">
-                  <Text className="font-jakarta text-sm font-bold text-spiroCyan">
+                <View className="bg-mistWhite px-3 py-2 rounded-lg">
+                  <Text className="font-jakartaBold text-sm font-bold text-skyBlue">
                     {formatSessionTime(session.durationSeconds)}
                   </Text>
                 </View>
