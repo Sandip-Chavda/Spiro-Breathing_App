@@ -1,10 +1,15 @@
 import AmbientBackground from "@/components/AmbientBackground";
 import FluidBreathingView from "@/components/FluidBreathingView";
 import { SafeAreaView } from "@/components/SafeAreaView";
-import { useSessionStore } from "@/store/useSessionStore";
+import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
+import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
 import {
   Check,
+  Lock,
+  Minus,
   Play,
+  Plus,
   RotateCcw,
   Settings,
   Square,
@@ -29,14 +34,7 @@ import Animated, {
 type Phase = "inhale" | "holdIn" | "exhale" | "holdOut" | "idle";
 type ActivePhase = "inhale" | "holdIn" | "exhale" | "holdOut";
 
-interface BreathingPattern {
-  name: string;
-  inhale: number;
-  holdIn: number;
-  exhale: number;
-  holdOut: number;
-  rounds: number;
-}
+const FREE_TIER_MAX_ROUNDS = 20;
 
 const PRESETS: BreathingPattern[] = [
   {
@@ -45,7 +43,8 @@ const PRESETS: BreathingPattern[] = [
     holdIn: 4,
     exhale: 4,
     holdOut: 4,
-    rounds: 10,
+    rounds: 20,
+    isPremium: false,
   },
   {
     name: "4-7-8 Relaxing",
@@ -53,7 +52,8 @@ const PRESETS: BreathingPattern[] = [
     holdIn: 7,
     exhale: 8,
     holdOut: 0,
-    rounds: 10,
+    rounds: 20,
+    isPremium: false,
   },
   {
     name: "Coherent Breathing",
@@ -61,12 +61,22 @@ const PRESETS: BreathingPattern[] = [
     holdIn: 0,
     exhale: 5,
     holdOut: 0,
-    rounds: 10,
+    rounds: 20,
+    isPremium: false,
+  },
+  {
+    name: "Deep Calm",
+    inhale: 6,
+    holdIn: 2,
+    exhale: 8,
+    holdOut: 0,
+    rounds: 20,
+    isPremium: true,
   },
 ];
 
-// FIX: Use strings for the input state so decimals don't get wiped out
 interface CustomPatternInput {
+  name: string;
   inhale: string;
   holdIn: string;
   exhale: string;
@@ -75,6 +85,7 @@ interface CustomPatternInput {
 }
 
 export default function BreatheScreen() {
+  const router = useRouter();
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -88,11 +99,12 @@ export default function BreatheScreen() {
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [customPattern, setCustomPattern] = useState<CustomPatternInput>({
+    name: "My Routine",
     inhale: "4",
     holdIn: "4",
     exhale: "4",
     holdOut: "4",
-    rounds: "10",
+    rounds: "20",
   });
 
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -100,6 +112,21 @@ export default function BreatheScreen() {
   const phaseIndexRef = useRef(0);
 
   const addSession = useSessionStore((state) => state.addSession);
+  const userRole = useSessionStore((state) => state.userRole);
+  const lastActiveDate = useSessionStore((state) => state.lastActiveDate);
+  const savedCustomRoutines = useSessionStore(
+    (state) => state.savedCustomRoutines,
+  );
+  const addCustomRoutine = useSessionStore((state) => state.addCustomRoutine);
+  const deleteCustomRoutine = useSessionStore(
+    (state) => state.deleteCustomRoutine,
+  );
+
+  const isPro = userRole === "premium_tier";
+
+  // Check if free user has already completed a session today
+  const today = new Date().toISOString().split("T")[0];
+  const isLockedForToday = !isPro && lastActiveDate === today;
 
   const getActivePhases = (pattern: BreathingPattern): ActivePhase[] => {
     const arr: ActivePhase[] = ["inhale"];
@@ -192,28 +219,44 @@ export default function BreatheScreen() {
 
   const handleSelectPattern = (pattern: BreathingPattern) => {
     handleReset();
-    setActivePattern(pattern);
-    // Sync custom inputs with the selected preset
+    let newPattern = { ...pattern };
+    // Cap rounds at 20 for free users
+    if (!isPro) {
+      newPattern.rounds = Math.min(pattern.rounds, FREE_TIER_MAX_ROUNDS);
+    }
+    setActivePattern(newPattern);
     setCustomPattern({
+      name: "My Routine",
       inhale: String(pattern.inhale),
       holdIn: String(pattern.holdIn),
       exhale: String(pattern.exhale),
       holdOut: String(pattern.holdOut),
-      rounds: String(pattern.rounds),
+      rounds: String(newPattern.rounds),
     });
     setIsModalVisible(false);
   };
 
   const handleSaveCustom = () => {
     const newPattern: BreathingPattern = {
-      name: "Custom Routine",
+      name: customPattern.name || "Custom Routine",
       inhale: parseFloat(customPattern.inhale) || 0,
       holdIn: parseFloat(customPattern.holdIn) || 0,
       exhale: parseFloat(customPattern.exhale) || 0,
       holdOut: parseFloat(customPattern.holdOut) || 0,
       rounds: parseInt(customPattern.rounds, 10) || 1,
+      isPremium: false,
     };
+    addCustomRoutine(newPattern); // Save to store
     handleSelectPattern(newPattern);
+  };
+
+  // Pro feature: Adjust rounds dynamically
+  const adjustRounds = (delta: number) => {
+    if (!isPro) return;
+    setActivePattern((prev) => ({
+      ...prev,
+      rounds: Math.max(1, prev.rounds + delta),
+    }));
   };
 
   const formatTime = (seconds: number) => {
@@ -263,15 +306,40 @@ export default function BreatheScreen() {
           </Text>
 
           {!hasStarted && (
-            <Pressable
-              onPress={() => setIsModalVisible(true)}
-              className="flex-row items-center bg-sleekSlate px-3 py-1.5 rounded-full mt-2 mb-6"
-            >
-              <Settings size={14} color="#00E5C9" />
-              <Text className="font-inter text-xs text-spiroCyan ml-1.5 font-bold">
-                Change Technique
-              </Text>
-            </Pressable>
+            <>
+              <Pressable
+                onPress={() => setIsModalVisible(true)}
+                className="flex-row items-center bg-sleekSlate px-3 py-1.5 rounded-full mt-2 mb-4"
+              >
+                <Settings size={14} color="#00E5C9" />
+                <Text className="font-inter text-xs text-spiroCyan ml-1.5 font-bold">
+                  Change Technique
+                </Text>
+              </Pressable>
+
+              {/* Pro Round Stepper / Free Round Display */}
+              <View className="flex-row items-center gap-4 mb-6">
+                {isPro && (
+                  <Pressable
+                    onPress={() => adjustRounds(-1)}
+                    className="w-10 h-10 rounded-full bg-sleekSlate items-center justify-center"
+                  >
+                    <Minus size={20} color="#FFFFFF" />
+                  </Pressable>
+                )}
+                <Text className="font-jakarta text-xl font-bold text-pureOxygen">
+                  {activePattern.rounds} Rounds
+                </Text>
+                {isPro && (
+                  <Pressable
+                    onPress={() => adjustRounds(1)}
+                    className="w-10 h-10 rounded-full bg-sleekSlate items-center justify-center"
+                  >
+                    <Plus size={20} color="#FFFFFF" />
+                  </Pressable>
+                )}
+              </View>
+            </>
           )}
 
           {hasStarted && (
@@ -335,7 +403,8 @@ export default function BreatheScreen() {
 
             <Pressable
               onPress={handlePlayPause}
-              className={`w-20 h-20 rounded-full items-center justify-center ${isRunning ? "bg-vagusIndigo" : "bg-spiroCyan"}`}
+              disabled={isLockedForToday && !hasStarted} // Disable play if locked for the day
+              className={`w-20 h-20 rounded-full items-center justify-center ${isRunning ? "bg-vagusIndigo" : "bg-spiroCyan"} ${isLockedForToday && !hasStarted ? "opacity-30" : ""}`}
             >
               {isRunning ? (
                 <Square size={32} color="#FFFFFF" fill="#FFFFFF" />
@@ -352,6 +421,30 @@ export default function BreatheScreen() {
         </View>
       </View>
 
+      {/* Daily Limit Lock Overlay (Free Users) */}
+      {isLockedForToday && !hasStarted && (
+        <View className="absolute inset-0 bg-obsidianDark/80 items-center justify-center z-20 px-8">
+          <View className="bg-sleekSlate border border-vagusIndigo/30 rounded-3xl p-8 items-center w-full">
+            <Lock size={40} color="#5F69FF" strokeWidth={2.5} />
+            <Text className="font-jakarta text-xl font-bold text-pureOxygen mt-4 mb-2">
+              Daily Limit Reached
+            </Text>
+            <Text className="font-inter text-mutedEther text-center mb-6">
+              Free users can complete one session per day. Upgrade to Pro for
+              unlimited daily breathing.
+            </Text>
+            <Pressable
+              onPress={() => router.push("/(tabs)/profile")}
+              className="bg-spiroCyan rounded-2xl py-4 px-8 w-full items-center"
+            >
+              <Text className="font-jakarta text-lg font-bold text-obsidianDark">
+                Upgrade to Pro
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {isComplete && (
         <View className="absolute inset-0 bg-obsidianDark/90 items-center justify-center z-20 px-8">
           <Animated.View
@@ -365,7 +458,7 @@ export default function BreatheScreen() {
               Session Complete!
             </Text>
             <Text className="font-inter text-mutedEther text-center mb-6">
-              You successfully completed {activePattern.rounds} rounds of{" "}
+              You successfully completed {currentRound} rounds of{" "}
               {activePattern.name}.
             </Text>
 
@@ -383,7 +476,7 @@ export default function BreatheScreen() {
                   Rounds
                 </Text>
                 <Text className="font-jakarta text-xl font-bold text-spiroCyan">
-                  {activePattern.rounds}
+                  {currentRound}
                 </Text>
               </View>
             </View>
@@ -417,142 +510,238 @@ export default function BreatheScreen() {
                 Presets
               </Text>
               <View className="gap-3 mb-6">
-                {PRESETS.map((p) => (
-                  <Pressable
-                    key={p.name}
-                    onPress={() => handleSelectPattern(p)}
-                    className={`p-4 rounded-2xl border ${activePattern.name === p.name ? "bg-spiroCyan/10 border-spiroCyan" : "bg-sleekSlate border-mutedEther/10"}`}
-                  >
-                    <Text className="font-jakarta text-base font-bold text-pureOxygen">
-                      {p.name}
-                    </Text>
-                    <Text className="font-inter text-xs text-mutedEther mt-1">
-                      {p.inhale}s in {p.holdIn > 0 ? `- ${p.holdIn}s hold` : ""}{" "}
-                      - {p.exhale}s out{" "}
-                      {p.holdOut > 0 ? `- ${p.holdOut}s hold` : ""} • {p.rounds}{" "}
-                      rounds
-                    </Text>
-                  </Pressable>
-                ))}
+                {PRESETS.map((p) => {
+                  const isLocked = p.isPremium && !isPro;
+                  return (
+                    <Pressable
+                      key={p.name}
+                      onPress={() => !isLocked && handleSelectPattern(p)}
+                      disabled={isLocked}
+                      className={`p-4 rounded-2xl border flex-row justify-between items-center ${activePattern.name === p.name ? "bg-spiroCyan/10 border-spiroCyan" : "bg-sleekSlate border-mutedEther/10"} ${isLocked ? "opacity-50" : ""}`}
+                    >
+                      <View>
+                        <Text className="font-jakarta text-base font-bold text-pureOxygen">
+                          {p.name}
+                        </Text>
+                        <Text className="font-inter text-xs text-mutedEther mt-1">
+                          {p.inhale}s in{" "}
+                          {p.holdIn > 0 ? `- ${p.holdIn}s hold` : ""} -{" "}
+                          {p.exhale}s out{" "}
+                          {p.holdOut > 0 ? `- ${p.holdOut}s hold` : ""} •{" "}
+                          {p.rounds} rounds
+                        </Text>
+                      </View>
+                      {isLocked && <Lock size={20} color="#5F69FF" />}
+                    </Pressable>
+                  );
+                })}
               </View>
 
-              <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
-                Create Custom
-              </Text>
-              <View className="bg-sleekSlate p-4 rounded-2xl border border-mutedEther/10 gap-4">
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-inter text-pureOxygen">
-                    Inhale (sec)
+              {/* Saved Custom Routines (Pro Feature) */}
+              {isPro && savedCustomRoutines.length > 0 && (
+                <>
+                  <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
+                    My Saved Routines
                   </Text>
-                  <TextInput
-                    style={{
-                      backgroundColor: "#0A0D10",
-                      width: 64,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                    }}
-                    keyboardType="decimal-pad"
-                    value={customPattern.inhale}
-                    onChangeText={(text) =>
-                      setCustomPattern((prev) => ({ ...prev, inhale: text }))
-                    }
-                  />
-                </View>
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-inter text-pureOxygen">
-                    Hold In (sec)
-                  </Text>
-                  <TextInput
-                    style={{
-                      backgroundColor: "#0A0D10",
-                      width: 64,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                    }}
-                    keyboardType="decimal-pad"
-                    value={customPattern.holdIn}
-                    onChangeText={(text) =>
-                      setCustomPattern((prev) => ({ ...prev, holdIn: text }))
-                    }
-                  />
-                </View>
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-inter text-pureOxygen">
-                    Exhale (sec)
-                  </Text>
-                  <TextInput
-                    style={{
-                      backgroundColor: "#0A0D10",
-                      width: 64,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                    }}
-                    keyboardType="decimal-pad"
-                    value={customPattern.exhale}
-                    onChangeText={(text) =>
-                      setCustomPattern((prev) => ({ ...prev, exhale: text }))
-                    }
-                  />
-                </View>
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-inter text-pureOxygen">
-                    Hold Out (sec)
-                  </Text>
-                  <TextInput
-                    style={{
-                      backgroundColor: "#0A0D10",
-                      width: 64,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                    }}
-                    keyboardType="decimal-pad"
-                    value={customPattern.holdOut}
-                    onChangeText={(text) =>
-                      setCustomPattern((prev) => ({ ...prev, holdOut: text }))
-                    }
-                  />
-                </View>
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-inter text-pureOxygen">Rounds</Text>
-                  <TextInput
-                    style={{
-                      backgroundColor: "#0A0D10",
-                      width: 64,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                    }}
-                    keyboardType="numeric"
-                    value={customPattern.rounds}
-                    onChangeText={(text) =>
-                      setCustomPattern((prev) => ({ ...prev, rounds: text }))
-                    }
-                  />
-                </View>
-              </View>
+                  <View className="gap-3 mb-6">
+                    {savedCustomRoutines.map((r) => (
+                      <View
+                        key={r.id}
+                        className="p-4 rounded-2xl border bg-sleekSlate border-mutedEther/10 flex-row justify-between items-center"
+                      >
+                        <Pressable
+                          onPress={() => handleSelectPattern(r)}
+                          className="flex-1"
+                        >
+                          <Text className="font-jakarta text-base font-bold text-pureOxygen">
+                            {r.name}
+                          </Text>
+                          <Text className="font-inter text-xs text-mutedEther mt-1">
+                            {r.inhale}s in - {r.exhale}s out • {r.rounds} rounds
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => r.id && deleteCustomRoutine(r.id)}
+                          className="ml-4"
+                        >
+                          <X size={20} color="#5F69FF" />
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
+                </>
+              )}
 
-              <Pressable
-                onPress={handleSaveCustom}
-                className="bg-spiroCyan rounded-2xl py-4 mt-6 items-center"
-              >
-                <Text className="font-jakarta text-lg font-bold text-obsidianDark">
-                  Save & Use Custom
+              {/* Custom Builder with Pro Lock Overlay */}
+              <View className="relative">
+                <Text className="font-jakarta text-sm text-mutedEther uppercase mb-3">
+                  Create Custom
                 </Text>
-              </Pressable>
+                <View className="bg-sleekSlate p-4 rounded-2xl border border-mutedEther/10 gap-4">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">
+                      Routine Name
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 140,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      placeholder="My Routine"
+                      placeholderTextColor="#8A99AD"
+                      value={customPattern.name}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, name: text }))
+                      }
+                      editable={isPro} // Disable input if not pro
+                    />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">
+                      Inhale (sec)
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 64,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      keyboardType="decimal-pad"
+                      value={customPattern.inhale}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, inhale: text }))
+                      }
+                      editable={isPro}
+                    />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">
+                      Hold In (sec)
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 64,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      keyboardType="decimal-pad"
+                      value={customPattern.holdIn}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, holdIn: text }))
+                      }
+                      editable={isPro}
+                    />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">
+                      Exhale (sec)
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 64,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      keyboardType="decimal-pad"
+                      value={customPattern.exhale}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, exhale: text }))
+                      }
+                      editable={isPro}
+                    />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">
+                      Hold Out (sec)
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 64,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      keyboardType="decimal-pad"
+                      value={customPattern.holdOut}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, holdOut: text }))
+                      }
+                      editable={isPro}
+                    />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-inter text-pureOxygen">Rounds</Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: "#0A0D10",
+                        width: 64,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        color: "#FFFFFF",
+                        textAlign: "center",
+                      }}
+                      keyboardType="numeric"
+                      value={customPattern.rounds}
+                      onChangeText={(text) =>
+                        setCustomPattern((prev) => ({ ...prev, rounds: text }))
+                      }
+                      editable={isPro}
+                    />
+                  </View>
+                </View>
+
+                {/* Blurred Lock Overlay for Free Users */}
+                {!isPro && (
+                  <View className="absolute inset-0 rounded-2xl overflow-hidden">
+                    <BlurView
+                      intensity={100}
+                      tint="systemThickMaterialDark"
+                      className="flex-1 items-center justify-center p-8"
+                    >
+                      <Lock size={32} color="#5F69FF" />
+                      <Text className="font-jakarta text-lg font-bold text-pureOxygen mt-4 mb-2">
+                        Pro Feature
+                      </Text>
+                      <Text className="font-inter text-sm text-mutedEther text-center">
+                        Upgrade to Pro to create and save your own custom
+                        breathing routines.
+                      </Text>
+                    </BlurView>
+                  </View>
+                )}
+              </View>
+
+              {isPro && (
+                <Pressable
+                  onPress={handleSaveCustom}
+                  className="bg-spiroCyan rounded-2xl py-4 mt-6 items-center"
+                >
+                  <Text className="font-jakarta text-lg font-bold text-obsidianDark">
+                    Save & Use Custom
+                  </Text>
+                </Pressable>
+              )}
             </ScrollView>
           </View>
         </View>

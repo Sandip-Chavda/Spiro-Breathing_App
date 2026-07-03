@@ -5,16 +5,19 @@
 @import "nativewind/theme";
 
 @theme {
-  /* 🎨 COLOR PALETTE TOKENS */
-  --color-spiroCyan: #00e5c9;
-  --color-deepKinetic: #00a896;
-  --color-vagusIndigo: #5f69ff;
-  --color-obsidianDark: #0a0d10;
-  --color-sleekSlate: #141a21;
-  --color-pureOxygen: #ffffff;
-  --color-mutedEther: #8a99ad;
+  /* 🎨 COLOR PALETTE TOKENS — "Breath Temperature"
+     Inhale cools, exhale warms, hold sits in violet stillness. */
+  --color-skyBlue: #3e7eff; /* Inhale phase, primary actions, active tab */
+  --color-emberCoral: #ff7a59; /* Exhale phase, secondary accents */
+  --color-duskViolet: #7c6fef; /* Hold phase, premium markers */
+  --color-mistWhite: #f6f8fb; /* Global canvas background */
+  --color-cloudPanel: #ffffff; /* Cards, inputs, modals */
+  --color-inkNavy: #16202e; /* Primary text */
+  --color-driftGray: #77879b; /* Muted text, inactive icons */
+  --color-hairline: #e3e9f1; /* Borders / dividers */
 
   /* 📋 TYPOGRAPHY ARCHITECTURE */
   --font-jakarta: "PlusJakartaSans-SemiBold", "sans-serif";
+  --font-jakartaBold: "PlusJakartaSans-Bold", "sans-serif";
   --font-inter: "Inter-Regular", "sans-serif";
 }

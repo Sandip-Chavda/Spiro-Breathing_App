@@ -1,6 +1,7 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
 import { useSessionStore } from "@/store/useSessionStore";
-import { Clock, Flame, History } from "lucide-react-native";
+import { BlurView } from "expo-blur";
+import { Clock, Flame, History, Lock } from "lucide-react-native";
 import { useMemo } from "react";
 import {
   Dimensions,
@@ -16,6 +17,23 @@ export default function ProfileScreen() {
   const sessions = useSessionStore((state) => state.sessions);
   const currentStreak = useSessionStore((state) => state.currentStreak);
   const clearHistory = useSessionStore((state) => state.clearHistory);
+  const userRole = useSessionStore((state) => state.userRole);
+  const isPro = useSessionStore((state) => state.userRole) === "premium_tier";
+  const upgradeToPro = useSessionStore((state) => state.upgradeToPro);
+
+  const dummyHeatmapValues = useMemo(() => {
+    const today = new Date();
+    const data = [];
+    for (let i = 0; i < 105; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      data.push({
+        date: date.toISOString().slice(0, 10),
+        count: Math.floor(Math.random() * 15),
+      });
+    }
+    return data;
+  }, []);
 
   const totalSeconds = sessions.reduce((acc, s) => acc + s.durationSeconds, 0);
 
@@ -106,7 +124,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <Text className="font-jakarta text-lg font-bold text-pureOxygen mb-3">
+        {/* <Text className="font-jakarta text-lg font-bold text-pureOxygen mb-3">
           Consistency Graph
         </Text>
         <View className="bg-sleekSlate rounded-2xl p-4 border border-mutedEther/10 mb-8">
@@ -174,7 +192,122 @@ export default function ProfileScreen() {
             />
             <Text style={{ fontSize: 12, color: "#8A99AD" }}>More</Text>
           </View>
+        </View> */}
+
+        <Text className="font-jakarta text-lg font-bold text-pureOxygen mb-3">
+          Consistency Graph
+        </Text>
+        <View className="bg-sleekSlate rounded-2xl p-4 border border-mutedEther/10 mb-8 relative">
+          {/* Generate dummy data for free users to show behind the blur */}
+          <ContributionGraph
+            values={isPro ? heatmapValues : dummyHeatmapValues}
+            endDate={new Date()}
+            numDays={105}
+            width={chartWidth}
+            height={170}
+            weekStartsOn={1}
+            cellSize={12}
+            gutterSize={4}
+            showMonthLabels
+            showWeekdayLabels
+            theme="dark"
+            emptyColor="#1E2632"
+            colors={["#0E4442", "#11756F", "#00B8A7", "#00E5C9"]}
+            onDayPress={(day) => console.log(day)}
+          />
+
+          {/* Blurred Lock Overlay for Free Users */}
+          {!isPro && (
+            <View className="absolute inset-0 rounded-2xl overflow-hidden">
+              <BlurView
+                intensity={100}
+                tint="systemThickMaterialDark"
+                className="flex-1 items-center justify-center p-8"
+              >
+                <Lock size={32} color="#00E5C9" />
+                <Text className="font-jakarta text-lg font-bold text-pureOxygen mt-4 mb-2">
+                  Unlock Your Progress
+                </Text>
+                <Text className="font-inter text-sm text-mutedEther text-center mb-6">
+                  Upgrade to Pro to track your daily consistency and session
+                  history.
+                </Text>
+                <Pressable
+                  onPress={upgradeToPro}
+                  className="bg-spiroCyan rounded-xl py-3 px-6"
+                >
+                  <Text className="font-jakarta text-base font-bold text-obsidianDark">
+                    Upgrade to Pro
+                  </Text>
+                </Pressable>
+              </BlurView>
+            </View>
+          )}
+
+          {/* Legend (Only show for Pro users) */}
+          {isPro && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Text style={{ fontSize: 12, color: "#8A99AD", marginRight: 8 }}>
+                Less
+              </Text>
+              <View
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 2,
+                  backgroundColor: "#1E2632",
+                  marginRight: 4,
+                }}
+              />
+              <View
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 2,
+                  backgroundColor: "#003833",
+                  marginRight: 4,
+                }}
+              />
+              <View
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 2,
+                  backgroundColor: "#00756A",
+                  marginRight: 4,
+                }}
+              />
+              <View
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 2,
+                  backgroundColor: "#00E5C9",
+                  marginRight: 8,
+                }}
+              />
+              <Text style={{ fontSize: 12, color: "#8A99AD" }}>More</Text>
+            </View>
+          )}
         </View>
+
+        {/* Pro Upgrade Button (For Testing) */}
+        {!isPro && (
+          <Pressable
+            onPress={upgradeToPro}
+            className="bg-vagusIndigo rounded-2xl py-4 px-8 w-full items-center mb-8"
+          >
+            <Text className="font-jakarta text-lg font-bold text-pureOxygen">
+              Upgrade to Pro (Test)
+            </Text>
+          </Pressable>
+        )}
 
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center">
