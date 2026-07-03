@@ -1,3 +1,6 @@
+import { SafeAreaView } from "@/components/SafeAreaView";
+import { Activity, Heart, Sparkles } from "lucide-react-native";
+import { useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -9,10 +12,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-
-import { SafeAreaView } from "@/components/SafeAreaview";
-import { Activity, Heart, Sparkles } from "lucide-react-native";
-import { useState } from "react";
 
 export default function DiagnosticsScreen() {
   const [stressLevel, setStressLevel] = useState(5);
