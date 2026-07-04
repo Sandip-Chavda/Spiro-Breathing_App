@@ -4,6 +4,7 @@ import { useSessionStore } from "@/store/useSessionStore";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import {
+  AlertTriangle,
   ChevronRight,
   Clock,
   Flame,
@@ -101,6 +102,45 @@ export default function ProfileScreen() {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "This permanently deletes your account and all your data, sessions, streaks, and custom routines. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Continue",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              "Are you absolutely sure?",
+              "There is no way to recover your account after this.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete Permanently",
+                  style: "destructive",
+                  onPress: async () => {
+                    const { error } = await supabase.rpc("delete_user");
+                    if (error) {
+                      console.warn("Account deletion failed:", error.message);
+                      Alert.alert(
+                        "Something went wrong",
+                        "Couldn't delete your account. Please try again or contact support.",
+                      );
+                      return;
+                    }
+                    await supabase.auth.signOut();
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -323,6 +363,21 @@ export default function ProfileScreen() {
             Sign Out
           </Text>
         </Pressable>
+
+        <View className="mt-10 pt-6 border-t border-emberCoral">
+          <Text className="font-inter text-xs text-emberCoral uppercase mb-3 text-center">
+            Danger Zone
+          </Text>
+          <Pressable
+            onPress={handleDeleteAccount}
+            className="flex-row items-center justify-center gap-2 bg-emberCoral/5 border border-emberCoral/20 rounded-2xl py-4"
+          >
+            <AlertTriangle size={16} color="#FF7A59" />
+            <Text className="font-jakartaBold text-sm font-bold text-emberCoral">
+              Delete Account
+            </Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
