@@ -1,8 +1,8 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
 import { useSessionStore } from "@/store/useSessionStore";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
-import { Clock, Flame, History, Lock } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { ChevronRight, Clock, Flame, History, Lock } from "lucide-react-native";
 import { useMemo } from "react";
 import {
   Dimensions,
@@ -21,6 +21,7 @@ export default function ProfileScreen() {
   const userRole = useSessionStore((state) => state.userRole);
   const isPro = useSessionStore((state) => state.userRole) === "premium_tier";
   const upgradeToPro = useSessionStore((state) => state.upgradeToPro);
+  const router = useRouter();
 
   const dummyHeatmapValues = useMemo(() => {
     const today = new Date();
@@ -239,6 +240,17 @@ export default function ProfileScreen() {
               History Log
             </Text>
           </View>
+          {sessions.length > 3 && (
+            <Pressable
+              onPress={() => router.push("/history")}
+              className="flex-row items-center"
+            >
+              <Text className="font-jakartaBold text-xs font-bold text-skyBlue">
+                View All
+              </Text>
+              <ChevronRight size={14} color="#3E7EFF" />
+            </Pressable>
+          )}
         </View>
 
         {sessions.length === 0 ? (
@@ -250,7 +262,7 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <View className="gap-3">
-            {sessions.map((session) => (
+            {sessions.slice(0, 3).map((session) => (
               <View
                 key={session.id}
                 className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row justify-between items-center"
