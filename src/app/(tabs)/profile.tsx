@@ -1,10 +1,19 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
+import { supabase } from "@/lib/supabase";
 import { useSessionStore } from "@/store/useSessionStore";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import { ChevronRight, Clock, Flame, History, Lock } from "lucide-react-native";
+import {
+  ChevronRight,
+  Clock,
+  Flame,
+  History,
+  Lock,
+  LogOut,
+} from "lucide-react-native";
 import { useMemo } from "react";
 import {
+  Alert,
   Dimensions,
   Platform,
   Pressable,
@@ -79,6 +88,20 @@ export default function ProfileScreen() {
   }, [sessions]);
 
   const chartWidth = Dimensions.get("window").width - 72;
+
+  const handleSignOut = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) console.warn("Sign out failed:", error.message);
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView
@@ -284,6 +307,22 @@ export default function ProfileScreen() {
             ))}
           </View>
         )}
+        <Pressable
+          onPress={handleSignOut}
+          className="flex-row justify-center gap-2 mt-8 bg-skyBlue rounded-2xl py-4 items-center"
+          style={{
+            shadowColor: "#3E7EFF",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.25,
+            shadowRadius: 16,
+            elevation: 6,
+          }}
+        >
+          <LogOut size={16} color="#ffffff" />
+          <Text className="font-jakartaBold text-base font-bold text-cloudPanel">
+            Sign Out
+          </Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
