@@ -73,11 +73,11 @@ export const TECHNIQUES: Technique[] = [
     precautions: [
       "The 7-second hold is longer than Box Breathing — beginners may feel lightheaded on the first few rounds. This is common and usually passes as you adjust",
       "Start with 4 rounds and build up gradually rather than jumping to 20",
-      "If you have low blood pressure, stand up slowly after practicing — don't rise quickly right after a session",
+      "If you have low blood pressure, stand up slowly after practicing",
     ],
     warnings: [
       "Do not practice while driving, operating machinery, or in water",
-      "Stop immediately if you feel dizzy, short of breath, or unwell — resume normal breathing",
+      "Stop immediately if you feel dizzy, short of breath, or unwell",
       "If you are pregnant or have a heart, lung, or panic disorder, consult a doctor before trying breath-hold techniques",
     ],
   },
@@ -131,11 +131,11 @@ export const TECHNIQUES: Technique[] = [
       "Sit or lie in a quiet space",
       "Inhale deeply through your nose for 6 seconds",
       "Hold briefly for 2 seconds",
-      "Exhale slowly and fully for 8 seconds — longer than the inhale is the key to this one",
+      "Exhale slowly and fully for 8 seconds — longer than the inhale is the key",
       "Repeat at a pace that feels sustainable, not forced",
     ],
     precautions: [
-      "The long exhale can feel intense at first — it's normal to run out of air before 8 seconds when you're new to it. Don't force it; let the count adjust to your comfort as you practice",
+      "The long exhale can feel intense at first — it's normal to run out of air before 8 seconds when you're new to it",
       "Recommended after you're comfortable with Box Breathing or 4-7-8",
     ],
     warnings: [

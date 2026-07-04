@@ -59,7 +59,10 @@ interface CustomPatternInput {
 
 export default function BreatheScreen() {
   const router = useRouter();
-  const { techniqueId } = useLocalSearchParams<{ techniqueId?: string }>();
+  const { techniqueId, customRoutineId } = useLocalSearchParams<{
+    techniqueId?: string;
+    customRoutineId?: string;
+  }>();
 
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -109,14 +112,19 @@ export default function BreatheScreen() {
     return arr;
   };
 
-  // Load a technique passed in from the Techniques screen
+  // Load a technique or saved custom routine passed in via navigation params
   useEffect(() => {
+    if (customRoutineId) {
+      const r = savedCustomRoutines.find((x) => x.id === customRoutineId);
+      if (r) handleSelectPattern(r);
+      return;
+    }
     if (!techniqueId) return;
     const t = getTechniqueById(techniqueId);
     if (!t) return;
-    if (t.isPremium && !isPro) return; // safety guard — shouldn't be reachable via UI
+    if (t.isPremium && !isPro) return; // safety guard
     handleSelectPattern(t);
-  }, [techniqueId]);
+  }, [techniqueId, customRoutineId]);
 
   useEffect(() => {
     if (isComplete && elapsedTime > 0) {
@@ -439,7 +447,7 @@ export default function BreatheScreen() {
               unlimited daily breathing.
             </Text>
             <Pressable
-              onPress={() => router.push("/(tabs)/profile")}
+              onPress={() => router.push("/upgrade")}
               className="bg-skyBlue rounded-2xl py-4 px-8 w-full items-center"
             >
               <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
@@ -687,7 +695,7 @@ export default function BreatheScreen() {
                   <View className="absolute inset-0 rounded-2xl overflow-hidden">
                     <BlurView
                       intensity={80}
-                      tint="light"
+                      tint="systemChromeMaterialLight"
                       className="flex-1 items-center justify-center p-8"
                     >
                       <Lock size={32} color="#7C6FEF" />

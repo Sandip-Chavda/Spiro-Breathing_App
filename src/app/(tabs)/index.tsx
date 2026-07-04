@@ -18,6 +18,9 @@ export default function HomeScreen() {
   const lastActiveDate = useSessionStore((state) => state.lastActiveDate);
   const userRole = useSessionStore((state) => state.userRole);
   const sessions = useSessionStore((state) => state.sessions);
+  const savedCustomRoutines = useSessionStore(
+    (state) => state.savedCustomRoutines,
+  );
 
   const isPro = userRole === "premium_tier";
   const today = new Date().toISOString().split("T")[0];
@@ -84,7 +87,6 @@ export default function HomeScreen() {
           Ready to breathe?
         </Text>
 
-        {/* Hero CTA */}
         <Pressable
           onPress={() => router.push("/(tabs)/breathe")}
           className="bg-skyBlue rounded-3xl p-6 mb-10"
@@ -113,7 +115,41 @@ export default function HomeScreen() {
           </Text>
         </Pressable>
 
-        <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
+        {isPro && savedCustomRoutines.length > 0 && (
+          <>
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="font-jakarta text-sm text-driftGray uppercase">
+                My Routines
+              </Text>
+              <Pressable onPress={() => router.push("/techniques")}>
+                <Text className="font-jakartaBold text-xs font-bold text-skyBlue">
+                  View All
+                </Text>
+              </Pressable>
+            </View>
+            {savedCustomRoutines.slice(0, 3).map((r) => (
+              <Pressable
+                key={r.id}
+                onPress={() =>
+                  router.push(`/(tabs)/breathe?customRoutineId=${r.id}`)
+                }
+                className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row items-center mb-3"
+              >
+                <View className="flex-1">
+                  <Text className="font-jakartaBold text-base font-bold text-inkNavy">
+                    {r.name}
+                  </Text>
+                  <Text className="font-inter text-xs text-driftGray mt-1">
+                    {r.inhale}s in - {r.exhale}s out • {r.rounds} rounds
+                  </Text>
+                </View>
+                <ChevronRight size={18} color="#77879B" />
+              </Pressable>
+            ))}
+          </>
+        )}
+
+        <Text className="font-jakarta text-sm text-driftGray uppercase mt-2 mb-3">
           Free Techniques
         </Text>
         {freeTechniques.map(renderCard)}

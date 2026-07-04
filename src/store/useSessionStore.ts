@@ -30,16 +30,15 @@ interface SessionState {
   currentStreak: number;
   lastActiveDate: string | null;
 
-  // Ad-unlock state — scaffolded now, UI wiring comes later once ads are built
   bonusSessionDate: string | null;
   bonusRoundsToday: number;
   unlockedPresetIds: string[];
 
   upgradeToPro: () => void;
   addSession: (session: BreathingSession) => void;
+  deleteSession: (id: string) => void;
   addCustomRoutine: (routine: BreathingPattern) => void;
   deleteCustomRoutine: (id: string) => void;
-  clearHistory: () => void;
 
   unlockBonusSession: () => void;
   unlockBonusRounds: (rounds: number) => void;
@@ -122,6 +121,25 @@ export const useSessionStore = create<SessionState>()(
           });
       },
 
+      deleteSession: (id) => {
+        set((state) => ({
+          sessions: state.sessions.filter((s) => s.id !== id),
+        }));
+
+        const userId = get().userId;
+        if (!userId) return;
+
+        supabase
+          .from("sessions")
+          .delete()
+          .eq("id", id)
+          .eq("user_id", userId)
+          .then(({ error }) => {
+            if (error)
+              console.warn("deleteSession sync failed:", error.message);
+          });
+      },
+
       addCustomRoutine: (routine) => {
         const newRoutine = { ...routine, id: generateUUID() };
         set((state) => ({
@@ -170,29 +188,9 @@ export const useSessionStore = create<SessionState>()(
           });
       },
 
-      clearHistory: () => {
-        set({ sessions: [], currentStreak: 0, lastActiveDate: null });
-
-        const userId = get().userId;
-        if (!userId) return;
-
-        supabase
-          .from("sessions")
-          .delete()
-          .eq("user_id", userId)
-          .then(({ error }) => {
-            if (error) console.warn("clearHistory sync failed:", error.message);
-          });
-
-        supabase
-          .from("profiles")
-          .update({ current_streak: 0, last_active_date: null })
-          .eq("id", userId)
-          .then(({ error }) => {
-            if (error)
-              console.warn("clearHistory profile sync failed:", error.message);
-          });
-      },
+      // Pro-only: clearing history used to also null out lastActiveDate,
+      // which accidentally bypassed the free-tier daily lock. Use
+      // deleteSession for individual removals on free tier instead.
 
       unlockBonusSession: () => {
         const today = new Date().toISOString().split("T")[0];

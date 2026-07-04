@@ -63,7 +63,6 @@ export default function TechniqueDetailScreen() {
           {technique.intensity} · {technique.rounds} rounds
         </Text>
 
-        {/* Benefits */}
         <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
           Benefits
         </Text>
@@ -78,7 +77,6 @@ export default function TechniqueDetailScreen() {
           ))}
         </View>
 
-        {/* How to */}
         <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
           How to Practice
         </Text>
@@ -93,7 +91,6 @@ export default function TechniqueDetailScreen() {
           ))}
         </View>
 
-        {/* Precautions */}
         <View className="flex-row items-center mb-2">
           <ShieldAlert size={16} color="#3E7EFF" />
           <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
@@ -111,7 +108,6 @@ export default function TechniqueDetailScreen() {
           ))}
         </View>
 
-        {/* Warnings */}
         <View className="flex-row items-center mb-2">
           <AlertTriangle size={16} color="#FF7A59" />
           <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
@@ -130,11 +126,10 @@ export default function TechniqueDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* Sticky CTA */}
-      <View className="absolute bottom-0 left-0 right-0 px-6 border-hairline mb-16">
+      <View className="absolute bottom-0 left-0 right-0 px-6 py-4 border-hairline mb-14">
         {locked ? (
           <Pressable
-            onPress={() => router.push("/(tabs)/profile")}
+            onPress={() => router.push("/upgrade")}
             className="bg-duskViolet rounded-2xl py-4 items-center flex-row justify-center"
           >
             <Lock size={18} color="#FFFFFF" style={{ marginRight: 8 }} />

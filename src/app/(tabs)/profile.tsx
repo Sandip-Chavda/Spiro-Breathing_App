@@ -1,6 +1,7 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
 import { useSessionStore } from "@/store/useSessionStore";
 import { BlurView } from "expo-blur";
+import { router } from "expo-router";
 import { Clock, Flame, History, Lock } from "lucide-react-native";
 import { useMemo } from "react";
 import {
@@ -16,7 +17,7 @@ import { ContributionGraph } from "react-native-chart-kit/v2";
 export default function ProfileScreen() {
   const sessions = useSessionStore((state) => state.sessions);
   const currentStreak = useSessionStore((state) => state.currentStreak);
-  const clearHistory = useSessionStore((state) => state.clearHistory);
+  const deleteSession = useSessionStore((state) => state.deleteSession);
   const userRole = useSessionStore((state) => state.userRole);
   const isPro = useSessionStore((state) => state.userRole) === "premium_tier";
   const upgradeToPro = useSessionStore((state) => state.upgradeToPro);
@@ -66,15 +67,12 @@ export default function ProfileScreen() {
 
     sessions.forEach((session) => {
       const date = session.completedAt.split("T")[0];
-
-      // convert seconds → minutes (keep precision)
       const minutes = Math.round(session.durationSeconds / 60);
       map.set(date, (map.get(date) ?? 0) + minutes);
     });
 
     return Array.from(map.entries()).map(([date, count]) => ({
       date,
-      // round ONCE here (important for chart stability)
       count: Math.round(count),
     }));
   }, [sessions]);
@@ -127,7 +125,6 @@ export default function ProfileScreen() {
           Consistency Graph
         </Text>
         <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-8 relative">
-          {/* Generate dummy data for free users to show behind the blur */}
           <ContributionGraph
             values={isPro ? heatmapValues : dummyHeatmapValues}
             endDate={new Date()}
@@ -144,7 +141,6 @@ export default function ProfileScreen() {
             onDayPress={(day) => console.log(day)}
           />
 
-          {/* Blurred Lock Overlay for Free Users */}
           {!isPro && (
             <View className="absolute inset-0 rounded-2xl overflow-hidden">
               <BlurView
@@ -161,7 +157,7 @@ export default function ProfileScreen() {
                   history.
                 </Text>
                 <Pressable
-                  onPress={upgradeToPro}
+                  onPress={() => router.push("/upgrade")}
                   className="bg-skyBlue rounded-xl py-3 px-6"
                 >
                   <Text className="font-jakartaBold text-base font-bold text-cloudPanel">
@@ -172,7 +168,6 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* Legend (Only show for Pro users) */}
           {isPro && (
             <View
               style={{
@@ -226,14 +221,13 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Pro Upgrade Button (For Testing) */}
         {!isPro && (
           <Pressable
-            onPress={upgradeToPro}
+            onPress={() => router.push("/upgrade")}
             className="bg-duskViolet rounded-2xl py-4 px-8 w-full items-center mb-8"
           >
             <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
-              Upgrade to Pro (Test)
+              View Plans
             </Text>
           </Pressable>
         )}
@@ -245,13 +239,6 @@ export default function ProfileScreen() {
               History Log
             </Text>
           </View>
-          {sessions.length > 0 && (
-            <Pressable onPress={clearHistory}>
-              <Text className="font-inter text-xs text-driftGray underline">
-                Clear All
-              </Text>
-            </Pressable>
-          )}
         </View>
 
         {sessions.length === 0 ? (
@@ -268,7 +255,7 @@ export default function ProfileScreen() {
                 key={session.id}
                 className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row justify-between items-center"
               >
-                <View>
+                <View className="flex-1">
                   <Text className="font-jakartaBold text-base font-bold text-inkNavy">
                     {session.patternName}
                   </Text>
@@ -276,7 +263,7 @@ export default function ProfileScreen() {
                     {formatDate(session.completedAt)}
                   </Text>
                 </View>
-                <View className="bg-mistWhite px-3 py-2 rounded-lg">
+                <View className="bg-mistWhite px-3 py-2 rounded-lg mr-3">
                   <Text className="font-jakartaBold text-sm font-bold text-skyBlue">
                     {formatSessionTime(session.durationSeconds)}
                   </Text>

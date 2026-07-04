@@ -10,6 +10,7 @@ export default function TechniquesScreen() {
   const router = useRouter();
   const { session, loading } = useAuth();
   const userRole = useSessionStore((s) => s.userRole);
+  const savedCustomRoutines = useSessionStore((s) => s.savedCustomRoutines);
   const isPro = userRole === "premium_tier";
 
   if (!loading && !session) {
@@ -72,6 +73,33 @@ export default function TechniquesScreen() {
           Premium
         </Text>
         {premiumTechniques.map(renderCard)}
+
+        {isPro && savedCustomRoutines.length > 0 && (
+          <>
+            <Text className="font-jakarta text-sm text-driftGray uppercase mt-6 mb-3">
+              My Routines
+            </Text>
+            {savedCustomRoutines.map((r) => (
+              <Pressable
+                key={r.id}
+                onPress={() =>
+                  router.push(`/(tabs)/breathe?customRoutineId=${r.id}`)
+                }
+                className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row items-center mb-3"
+              >
+                <View className="flex-1">
+                  <Text className="font-jakartaBold text-base font-bold text-inkNavy">
+                    {r.name}
+                  </Text>
+                  <Text className="font-inter text-xs text-driftGray mt-1">
+                    {r.inhale}s in - {r.exhale}s out • {r.rounds} rounds
+                  </Text>
+                </View>
+                <ChevronRight size={18} color="#77879B" />
+              </Pressable>
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
