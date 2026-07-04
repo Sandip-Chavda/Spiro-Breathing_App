@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/context/AuthProvider";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -26,18 +27,18 @@ export default function RootLayout() {
   }
 
   return (
-    <View className="flex-1 bg-mistWhite">
-      {/* Only passing the style prop here to fix the TS error */}
-      <StatusBar style="dark" />
-
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#F6F8FB" },
-        }}
-      >
-        <Stack.Screen name="index" />
-      </Stack>
-    </View>
+    <AuthProvider>
+      <View className="flex-1 bg-mistWhite">
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#F6F8FB" },
+          }}
+        >
+          <Stack.Screen name="index" />
+        </Stack>
+      </View>
+    </AuthProvider>
   );
 }

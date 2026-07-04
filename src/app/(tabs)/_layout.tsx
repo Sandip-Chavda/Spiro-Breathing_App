@@ -1,5 +1,6 @@
+import { useAuth } from "@/context/AuthProvider";
 import { BlurView } from "expo-blur";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Home, User, Wind } from "lucide-react-native";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -96,6 +97,12 @@ const CustomTabBar = ({ state, navigation }: any) => {
 };
 
 export default function TabsLayout() {
+  const { session, loading } = useAuth();
+
+  if (!loading && !session) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -123,7 +130,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
-    elevation: 8,
+    elevation: 3,
   },
   blurView: {
     flex: 1,

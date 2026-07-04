@@ -1,9 +1,11 @@
 import AmbientBackground from "@/components/AmbientBackground";
 import FluidBreathingView from "@/components/FluidBreathingView";
 import { SafeAreaView } from "@/components/SafeAreaView";
+import { getTechniqueById } from "@/data/techniques";
 import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
+import { generateUUID } from "@/utils/uuid";
 import { BlurView } from "expo-blur";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Check,
   Lock,
@@ -36,44 +38,15 @@ type ActivePhase = "inhale" | "holdIn" | "exhale" | "holdOut";
 
 const FREE_TIER_MAX_ROUNDS = 20;
 
-const PRESETS: BreathingPattern[] = [
-  {
-    name: "Box Breathing",
-    inhale: 4,
-    holdIn: 4,
-    exhale: 4,
-    holdOut: 4,
-    rounds: 20,
-    isPremium: false,
-  },
-  {
-    name: "4-7-8 Relaxing",
-    inhale: 4,
-    holdIn: 7,
-    exhale: 8,
-    holdOut: 0,
-    rounds: 20,
-    isPremium: false,
-  },
-  {
-    name: "Coherent Breathing",
-    inhale: 5,
-    holdIn: 0,
-    exhale: 5,
-    holdOut: 0,
-    rounds: 20,
-    isPremium: false,
-  },
-  {
-    name: "Deep Calm",
-    inhale: 6,
-    holdIn: 2,
-    exhale: 8,
-    holdOut: 0,
-    rounds: 20,
-    isPremium: true,
-  },
-];
+const DEFAULT_PATTERN: BreathingPattern = {
+  name: "Box Breathing",
+  inhale: 4,
+  holdIn: 4,
+  exhale: 4,
+  holdOut: 4,
+  rounds: 20,
+  isPremium: false,
+};
 
 interface CustomPatternInput {
   name: string;
@@ -86,6 +59,8 @@ interface CustomPatternInput {
 
 export default function BreatheScreen() {
   const router = useRouter();
+  const { techniqueId } = useLocalSearchParams<{ techniqueId?: string }>();
+
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -94,9 +69,8 @@ export default function BreatheScreen() {
   const [currentRound, setCurrentRound] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  const [activePattern, setActivePattern] = useState<BreathingPattern>(
-    PRESETS[0],
-  );
+  const [activePattern, setActivePattern] =
+    useState<BreathingPattern>(DEFAULT_PATTERN);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [customPattern, setCustomPattern] = useState<CustomPatternInput>({
     name: "My Routine",
@@ -124,7 +98,6 @@ export default function BreatheScreen() {
 
   const isPro = userRole === "premium_tier";
 
-  // Check if free user has already completed a session today
   const today = new Date().toISOString().split("T")[0];
   const isLockedForToday = !isPro && lastActiveDate === today;
 
@@ -136,10 +109,19 @@ export default function BreatheScreen() {
     return arr;
   };
 
+  // Load a technique passed in from the Techniques screen
+  useEffect(() => {
+    if (!techniqueId) return;
+    const t = getTechniqueById(techniqueId);
+    if (!t) return;
+    if (t.isPremium && !isPro) return; // safety guard — shouldn't be reachable via UI
+    handleSelectPattern(t);
+  }, [techniqueId]);
+
   useEffect(() => {
     if (isComplete && elapsedTime > 0) {
       addSession({
-        id: Date.now().toString(),
+        id: generateUUID(),
         patternName: activePattern.name,
         completedAt: new Date().toISOString(),
         durationSeconds: elapsedTime,
@@ -220,7 +202,6 @@ export default function BreatheScreen() {
   const handleSelectPattern = (pattern: BreathingPattern) => {
     handleReset();
     let newPattern = { ...pattern };
-    // Cap rounds at 20 for free users
     if (!isPro) {
       newPattern.rounds = Math.min(pattern.rounds, FREE_TIER_MAX_ROUNDS);
     }
@@ -246,11 +227,10 @@ export default function BreatheScreen() {
       rounds: parseInt(customPattern.rounds, 10) || 1,
       isPremium: false,
     };
-    addCustomRoutine(newPattern); // Save to store
+    addCustomRoutine(newPattern);
     handleSelectPattern(newPattern);
   };
 
-  // Pro feature: Adjust rounds dynamically
   const adjustRounds = (delta: number) => {
     if (!isPro) return;
     setActivePattern((prev) => ({
@@ -307,17 +287,34 @@ export default function BreatheScreen() {
 
           {!hasStarted && (
             <>
-              <Pressable
-                onPress={() => setIsModalVisible(true)}
-                className="flex-row items-center bg-skyBlue/10 border border-skyBlue/20 px-3 py-1.5 rounded-full mt-2 mb-4"
-              >
-                <Settings size={14} color="#3E7EFF" />
-                <Text className="font-inter text-xs text-skyBlue ml-1.5 font-bold">
-                  Change Technique
-                </Text>
-              </Pressable>
+              <View className="flex-row gap-2 mt-2 mb-4">
+                <Pressable
+                  onPress={() => router.push("/techniques")}
+                  className="flex-row items-center bg-skyBlue/10 border border-skyBlue/20 px-3 py-1.5 rounded-full"
+                >
+                  <Settings size={14} color="#3E7EFF" />
+                  <Text className="font-inter text-xs text-skyBlue ml-1.5 font-bold">
+                    Change Technique
+                  </Text>
+                </Pressable>
 
-              {/* Pro Round Stepper / Free Round Display */}
+                <Pressable
+                  onPress={() => setIsModalVisible(true)}
+                  className="flex-row items-center bg-duskViolet/10 border border-duskViolet/20 px-3 py-1.5 rounded-full"
+                >
+                  {!isPro && (
+                    <Lock
+                      size={13}
+                      color="#7C6FEF"
+                      style={{ marginRight: 6 }}
+                    />
+                  )}
+                  <Text className="font-inter text-xs text-duskViolet font-bold">
+                    Custom Routines
+                  </Text>
+                </Pressable>
+              </View>
+
               <View className="flex-row items-center gap-4 mb-6">
                 {isPro && (
                   <Pressable
@@ -403,7 +400,7 @@ export default function BreatheScreen() {
 
             <Pressable
               onPress={handlePlayPause}
-              disabled={isLockedForToday && !hasStarted} // Disable play if locked for the day
+              disabled={isLockedForToday && !hasStarted}
               className={`w-20 h-20 rounded-full items-center justify-center ${isRunning ? "bg-duskViolet" : "bg-skyBlue"} ${isLockedForToday && !hasStarted ? "opacity-30" : ""}`}
               style={{
                 shadowColor: isRunning ? "#7C6FEF" : "#3E7EFF",
@@ -428,7 +425,6 @@ export default function BreatheScreen() {
         </View>
       </View>
 
-      {/* Daily Limit Lock Overlay (Free Users) */}
       {isLockedForToday && !hasStarted && (
         <View className="absolute inset-0 bg-inkNavy/40 items-center justify-center z-20 px-8">
           <View className="bg-cloudPanel border border-hairline rounded-3xl p-8 items-center w-full shadow-lg">
@@ -507,7 +503,7 @@ export default function BreatheScreen() {
           <View className="bg-mistWhite border-t border-hairline rounded-t-3xl p-6 pb-12 max-h-[90%]">
             <View className="flex-row justify-between items-center mb-6">
               <Text className="font-jakartaBold text-xl font-bold text-inkNavy">
-                Breathing Techniques
+                Custom Routines
               </Text>
               <Pressable onPress={() => setIsModalVisible(false)}>
                 <X size={24} color="#77879B" />
@@ -515,38 +511,6 @@ export default function BreatheScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
-                Presets
-              </Text>
-              <View className="gap-3 mb-6">
-                {PRESETS.map((p) => {
-                  const isLocked = p.isPremium && !isPro;
-                  return (
-                    <Pressable
-                      key={p.name}
-                      onPress={() => !isLocked && handleSelectPattern(p)}
-                      disabled={isLocked}
-                      className={`p-4 rounded-2xl border flex-row justify-between items-center ${activePattern.name === p.name ? "bg-skyBlue/10 border-skyBlue" : "bg-cloudPanel border-hairline"} ${isLocked ? "opacity-50" : ""}`}
-                    >
-                      <View>
-                        <Text className="font-jakartaBold text-base font-bold text-inkNavy">
-                          {p.name}
-                        </Text>
-                        <Text className="font-inter text-xs text-driftGray mt-1">
-                          {p.inhale}s in{" "}
-                          {p.holdIn > 0 ? `- ${p.holdIn}s hold` : ""} -{" "}
-                          {p.exhale}s out{" "}
-                          {p.holdOut > 0 ? `- ${p.holdOut}s hold` : ""} •{" "}
-                          {p.rounds} rounds
-                        </Text>
-                      </View>
-                      {isLocked && <Lock size={20} color="#7C6FEF" />}
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              {/* Saved Custom Routines (Pro Feature) */}
               {isPro && savedCustomRoutines.length > 0 && (
                 <>
                   <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
@@ -581,7 +545,6 @@ export default function BreatheScreen() {
                 </>
               )}
 
-              {/* Custom Builder with Pro Lock Overlay */}
               <View className="relative">
                 <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
                   Create Custom
@@ -607,7 +570,7 @@ export default function BreatheScreen() {
                       onChangeText={(text) =>
                         setCustomPattern((prev) => ({ ...prev, name: text }))
                       }
-                      editable={isPro} // Disable input if not pro
+                      editable={isPro}
                     />
                   </View>
                   <View className="flex-row justify-between items-center">
@@ -720,12 +683,11 @@ export default function BreatheScreen() {
                   </View>
                 </View>
 
-                {/* Blurred Lock Overlay for Free Users */}
                 {!isPro && (
                   <View className="absolute inset-0 rounded-2xl overflow-hidden">
                     <BlurView
-                      intensity={85}
-                      tint="systemChromeMaterialLight"
+                      intensity={80}
+                      tint="light"
                       className="flex-1 items-center justify-center p-8"
                     >
                       <Lock size={32} color="#7C6FEF" />

@@ -1,33 +1,9 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
+import { TECHNIQUES } from "@/data/techniques";
 import { useSessionStore } from "@/store/useSessionStore";
 import { useRouter } from "expo-router";
-import {
-  ArrowRight,
-  Flame,
-  Lock,
-  Moon,
-  Sparkles,
-  Wind,
-} from "lucide-react-native";
+import { ChevronRight, Flame, Lock, Wind } from "lucide-react-native";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-
-const QUICK_TECHNIQUES = [
-  {
-    name: "Box Breathing",
-    blurb: "4-4-4-4",
-    icon: Wind,
-  },
-  {
-    name: "4-7-8 Relaxing",
-    blurb: "Wind down",
-    icon: Moon,
-  },
-  {
-    name: "Coherent",
-    blurb: "5-5 · Grounding",
-    icon: Sparkles,
-  },
-];
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -48,6 +24,35 @@ export default function HomeScreen() {
   const isLockedForToday = !isPro && lastActiveDate === today;
   const lastSession = sessions[0];
 
+  const freeTechniques = TECHNIQUES.filter((t) => !t.isPremium);
+  const premiumTechniques = TECHNIQUES.filter((t) => t.isPremium);
+
+  const renderCard = (t: (typeof TECHNIQUES)[number]) => {
+    const locked = t.isPremium && !isPro;
+    return (
+      <Pressable
+        key={t.id}
+        onPress={() => router.push(`/technique/${t.id}`)}
+        className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row items-center mb-3"
+      >
+        <View className="flex-1">
+          <View className="flex-row items-center">
+            <Text className="font-jakartaBold text-base font-bold text-inkNavy">
+              {t.name}
+            </Text>
+            {locked && (
+              <Lock size={13} color="#7C6FEF" style={{ marginLeft: 6 }} />
+            )}
+          </View>
+          <Text className="font-inter text-xs text-driftGray mt-1">
+            {t.tagline}
+          </Text>
+        </View>
+        <ChevronRight size={18} color="#77879B" />
+      </Pressable>
+    );
+  };
+
   return (
     <SafeAreaView
       className="flex-1 bg-mistWhite"
@@ -61,7 +66,6 @@ export default function HomeScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header row: greeting + streak badge */}
         <View className="flex-row items-center justify-between mb-1">
           <Text className="font-inter text-sm text-driftGray">
             {getGreeting()}
@@ -102,47 +106,22 @@ export default function HomeScreen() {
           <Text className="font-jakartaBold text-2xl font-bold text-cloudPanel mb-1">
             Begin Session
           </Text>
-          <Text className="font-inter text-sm text-cloudPanel/80 mb-6">
+          <Text className="font-inter text-sm text-cloudPanel/80">
             {lastSession
               ? `Continue with ${lastSession.patternName}`
               : "Start your first breathing cycle"}
           </Text>
-          <View className="flex-row items-center">
-            <Text className="font-jakartaBold text-sm font-bold text-cloudPanel">
-              {isLockedForToday ? "Unlock a bonus round" : "Start now"}
-            </Text>
-            <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
-          </View>
         </Pressable>
 
-        {/* Quick Start — horizontal chip scroller, visually distinct from Profile's list rows */}
         <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
-          Quick Start
+          Free Techniques
         </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12, paddingRight: 24 }}
-        >
-          {QUICK_TECHNIQUES.map((t) => (
-            <Pressable
-              key={t.name}
-              onPress={() => router.push("/(tabs)/breathe")}
-              className="bg-cloudPanel rounded-2xl p-4 border border-hairline items-start"
-              style={{ width: 128 }}
-            >
-              <View className="w-10 h-10 rounded-full bg-skyBlue/10 items-center justify-center mb-3">
-                <t.icon size={18} color="#3E7EFF" strokeWidth={2.5} />
-              </View>
-              <Text className="font-jakartaBold text-sm font-bold text-inkNavy">
-                {t.name}
-              </Text>
-              <Text className="font-inter text-xs text-driftGray mt-0.5">
-                {t.blurb}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+        {freeTechniques.map(renderCard)}
+
+        <Text className="font-jakarta text-sm text-driftGray uppercase mt-6 mb-3">
+          Premium Techniques
+        </Text>
+        {premiumTechniques.map(renderCard)}
       </ScrollView>
     </SafeAreaView>
   );
