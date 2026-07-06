@@ -67,6 +67,7 @@ export default function HomeScreen() {
   const savedCustomRoutines = useSessionStore(
     (state) => state.savedCustomRoutines,
   );
+  const fullName = useSessionStore((state) => state.fullName);
 
   const isPro = userRole === "premium_tier";
   const weekDates = useMemo(getWeekDates, []);
@@ -100,7 +101,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 24,
-          paddingTop: Platform.OS === "android" ? 40 : 20,
+          paddingTop: Platform.OS === "android" ? 10 : 20,
           paddingBottom: 140,
         }}
         showsVerticalScrollIndicator={false}
@@ -108,10 +109,13 @@ export default function HomeScreen() {
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View>
-            <Text className="font-inter text-sm text-driftGray">
-              {getGreeting()}
+            <Text className="text-2xl text-skyBlue font-jakartaBold">
+              <Text className="text-driftGray font-medium">
+                {getGreeting()}
+              </Text>
+              {fullName ? `, ${fullName.split(" ")[0]}` : ""}
             </Text>
-            <Text className="font-jakartaBold text-2xl font-bold text-inkNavy mt-0.5">
+            <Text className="font-semibold text-lg text-inkNavy mt-0.5">
               Ready to breathe?
             </Text>
           </View>

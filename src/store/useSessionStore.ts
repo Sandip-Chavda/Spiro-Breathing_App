@@ -34,6 +34,10 @@ interface SessionState {
   bonusRoundsToday: number;
   unlockedPresetIds: string[];
 
+  fullName: string | null;
+  profileHydrated: boolean;
+  setFullName: (name: string) => void;
+
   upgradeToPro: () => void;
   addSession: (session: BreathingSession) => void;
   deleteSession: (id: string) => void;
@@ -57,6 +61,8 @@ const DEFAULT_STATE = {
   lastActiveDate: null,
   bonusSessionDate: null,
   bonusRoundsToday: 0,
+  fullName: null,
+  profileHydrated: false,
   unlockedPresetIds: [],
 };
 
@@ -75,6 +81,19 @@ export const useSessionStore = create<SessionState>()(
           .eq("id", userId)
           .then(({ error }) => {
             if (error) console.warn("upgradeToPro sync failed:", error.message);
+          });
+      },
+
+      setFullName: (name) => {
+        set({ fullName: name });
+        const userId = get().userId;
+        if (!userId) return;
+        supabase
+          .from("profiles")
+          .update({ full_name: name })
+          .eq("id", userId)
+          .then(({ error }) => {
+            if (error) console.warn("setFullName sync failed:", error.message);
           });
       },
 
@@ -282,11 +301,13 @@ export const useSessionStore = create<SessionState>()(
 
         set({
           userRole: profile?.user_role ?? "free_tier",
+          fullName: profile?.full_name ?? null,
           currentStreak: profile?.current_streak ?? 0,
           lastActiveDate: profile?.last_active_date ?? null,
           bonusSessionDate: profile?.bonus_session_date ?? null,
           bonusRoundsToday: profile?.bonus_rounds_today ?? 0,
           unlockedPresetIds: profile?.unlocked_preset_ids ?? [],
+          profileHydrated: true,
           sessions: (sessions ?? []).map((s) => ({
             id: s.id,
             patternName: s.pattern_name,
