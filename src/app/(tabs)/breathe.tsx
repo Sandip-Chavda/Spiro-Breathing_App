@@ -255,6 +255,13 @@ export default function BreatheScreen() {
     return `${mins}:${secs}`;
   };
 
+  const formatEstimate = (totalSeconds: number) => {
+    if (totalSeconds < 60) return `${totalSeconds}s`;
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+  };
+
   const phaseText =
     phase === "idle"
       ? "Ready"
@@ -279,6 +286,15 @@ export default function BreatheScreen() {
     transform: [{ scale: popupScale.value }],
     opacity: popupScale.value,
   }));
+
+  const patternCycleSeconds =
+    activePattern.inhale +
+    activePattern.holdIn +
+    activePattern.exhale +
+    activePattern.holdOut;
+  const totalSessionSeconds = Math.round(
+    patternCycleSeconds * activePattern.rounds,
+  );
 
   return (
     <SafeAreaView
@@ -344,6 +360,9 @@ export default function BreatheScreen() {
                   </Pressable>
                 )}
               </View>
+              <Text className="font-inter text-lg text-driftGray text-center -mt-4 mb-2">
+                {formatEstimate(totalSessionSeconds)} Total
+              </Text>
             </>
           )}
 
@@ -557,23 +576,15 @@ export default function BreatheScreen() {
                 <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
                   Create Custom
                 </Text>
-                <View className="bg-cloudPanel p-4 rounded-2xl border border-hairline gap-4">
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">
+                <View className="bg-cloudPanel p-5 rounded-2xl border border-hairline">
+                  <View className="mb-5">
+                    <Text className="font-inter text-xs text-driftGray uppercase mb-2">
                       Routine Name
                     </Text>
                     <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 140,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
+                      className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
                       placeholder="My Routine"
-                      placeholderTextColor="#77879B"
+                      placeholderTextColor="#B8C2D1"
                       value={customPattern.name}
                       onChangeText={(text) =>
                         setCustomPattern((prev) => ({ ...prev, name: text }))
@@ -581,113 +592,97 @@ export default function BreatheScreen() {
                       editable={isPro}
                     />
                   </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">
-                      Inhale (sec)
-                    </Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 64,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
-                      keyboardType="decimal-pad"
-                      value={customPattern.inhale}
-                      onChangeText={(text) =>
-                        setCustomPattern((prev) => ({ ...prev, inhale: text }))
-                      }
-                      editable={isPro}
-                    />
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">
-                      Hold In (sec)
-                    </Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 64,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
-                      keyboardType="decimal-pad"
-                      value={customPattern.holdIn}
-                      onChangeText={(text) =>
-                        setCustomPattern((prev) => ({ ...prev, holdIn: text }))
-                      }
-                      editable={isPro}
-                    />
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">
-                      Exhale (sec)
-                    </Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 64,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
-                      keyboardType="decimal-pad"
-                      value={customPattern.exhale}
-                      onChangeText={(text) =>
-                        setCustomPattern((prev) => ({ ...prev, exhale: text }))
-                      }
-                      editable={isPro}
-                    />
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">
-                      Hold Out (sec)
-                    </Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 64,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
-                      keyboardType="decimal-pad"
-                      value={customPattern.holdOut}
-                      onChangeText={(text) =>
-                        setCustomPattern((prev) => ({ ...prev, holdOut: text }))
-                      }
-                      editable={isPro}
-                    />
-                  </View>
-                  <View className="flex-row justify-between items-center">
-                    <Text className="font-inter text-inkNavy">Rounds</Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: "#F6F8FB",
-                        width: 64,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        color: "#16202E",
-                        textAlign: "center",
-                      }}
-                      keyboardType="numeric"
-                      value={customPattern.rounds}
-                      onChangeText={(text) =>
-                        setCustomPattern((prev) => ({ ...prev, rounds: text }))
-                      }
-                      editable={isPro}
-                    />
+
+                  <View className="flex-row flex-wrap gap-x-6 gap-y-5 mb-2">
+                    <View style={{ width: "42%" }}>
+                      <Text className="font-inter text-xs text-driftGray uppercase mb-2">
+                        Inhale (sec)
+                      </Text>
+                      <TextInput
+                        className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
+                        keyboardType="decimal-pad"
+                        value={customPattern.inhale}
+                        onChangeText={(text) =>
+                          setCustomPattern((prev) => ({
+                            ...prev,
+                            inhale: text,
+                          }))
+                        }
+                        editable={isPro}
+                      />
+                    </View>
+
+                    <View style={{ width: "42%" }}>
+                      <Text className="font-inter text-xs text-driftGray uppercase mb-2">
+                        Hold In (sec)
+                      </Text>
+                      <TextInput
+                        className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
+                        keyboardType="decimal-pad"
+                        value={customPattern.holdIn}
+                        onChangeText={(text) =>
+                          setCustomPattern((prev) => ({
+                            ...prev,
+                            holdIn: text,
+                          }))
+                        }
+                        editable={isPro}
+                      />
+                    </View>
+
+                    <View style={{ width: "42%" }}>
+                      <Text className="font-inter text-xs text-driftGray uppercase mb-2">
+                        Exhale (sec)
+                      </Text>
+                      <TextInput
+                        className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
+                        keyboardType="decimal-pad"
+                        value={customPattern.exhale}
+                        onChangeText={(text) =>
+                          setCustomPattern((prev) => ({
+                            ...prev,
+                            exhale: text,
+                          }))
+                        }
+                        editable={isPro}
+                      />
+                    </View>
+
+                    <View style={{ width: "42%" }}>
+                      <Text className="font-inter text-xs text-driftGray uppercase mb-2">
+                        Hold Out (sec)
+                      </Text>
+                      <TextInput
+                        className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
+                        keyboardType="decimal-pad"
+                        value={customPattern.holdOut}
+                        onChangeText={(text) =>
+                          setCustomPattern((prev) => ({
+                            ...prev,
+                            holdOut: text,
+                          }))
+                        }
+                        editable={isPro}
+                      />
+                    </View>
+
+                    <View style={{ width: "100%" }}>
+                      <Text className="font-inter text-xs text-driftGray uppercase mb-2">
+                        Rounds
+                      </Text>
+                      <TextInput
+                        className="font-jakarta text-base text-inkNavy pb-2 border-b border-hairline"
+                        keyboardType="numeric"
+                        value={customPattern.rounds}
+                        onChangeText={(text) =>
+                          setCustomPattern((prev) => ({
+                            ...prev,
+                            rounds: text,
+                          }))
+                        }
+                        editable={isPro}
+                      />
+                    </View>
                   </View>
                 </View>
 

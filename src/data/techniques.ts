@@ -2,6 +2,8 @@ export interface Technique {
   id: string;
   name: string;
   tagline: string;
+  imageUrl: string;
+  goodFor: string[];
   inhale: number;
   holdIn: number;
   exhale: number;
@@ -20,6 +22,9 @@ export const TECHNIQUES: Technique[] = [
     id: "box-breathing",
     name: "Box Breathing",
     tagline: "4-4-4-4 · Steady focus",
+    imageUrl:
+      "https://images.unsplash.com/photo-1476611317561-60117649dd94?auto=format&fit=crop&w=800&q=80",
+    goodFor: ["Stress Relief", "Focus", "Grounding"],
     inhale: 4,
     holdIn: 4,
     exhale: 4,
@@ -52,6 +57,9 @@ export const TECHNIQUES: Technique[] = [
     id: "4-7-8-relaxing",
     name: "4-7-8 Relaxing",
     tagline: "4-7-8 · Wind down before sleep",
+    imageUrl:
+      "https://images.unsplash.com/photo-1518241353330-0f7941c60693?auto=format&fit=crop&w=800&q=80",
+    goodFor: ["Sleep", "Anxiety", "Racing Thoughts"],
     inhale: 4,
     holdIn: 7,
     exhale: 8,
@@ -85,6 +93,9 @@ export const TECHNIQUES: Technique[] = [
     id: "coherent-breathing",
     name: "Coherent Breathing",
     tagline: "5-5 · Even, grounding",
+    imageUrl:
+      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=800&q=80",
+    goodFor: ["Daily Calm", "Beginners", "Heart Health"],
     inhale: 5,
     holdIn: 0,
     exhale: 5,
@@ -116,6 +127,9 @@ export const TECHNIQUES: Technique[] = [
     id: "deep-calm",
     name: "Deep Calm",
     tagline: "6-2-8 · Extended release",
+    imageUrl:
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80",
+    goodFor: ["Acute Anxiety", "Panic", "Deep Relaxation"],
     inhale: 6,
     holdIn: 2,
     exhale: 8,

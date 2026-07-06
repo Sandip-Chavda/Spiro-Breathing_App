@@ -1,18 +1,30 @@
 import { useAuth } from "@/context/AuthProvider";
 import { getTechniqueById } from "@/data/techniques";
 import { useSessionStore } from "@/store/useSessionStore";
+import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   AlertTriangle,
   ArrowLeft,
   Lock,
   ShieldAlert,
 } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function TechniqueDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session, loading } = useAuth();
   const userRole = useSessionStore((s) => s.userRole);
@@ -39,94 +51,127 @@ export default function TechniqueDetailScreen() {
   };
 
   return (
-    <SafeAreaView
-      className="flex-1 bg-mistWhite"
-      edges={["top", "left", "right"]}
-    >
-      <View className="flex-row items-center px-6 pt-4 pb-2">
-        <Pressable onPress={() => router.back()} hitSlop={10} className="mr-3">
-          <ArrowLeft size={22} color="#16202E" />
-        </Pressable>
-      </View>
-
+    <SafeAreaView className="flex-1 bg-mistWhite" edges={["left", "right"]}>
+      <StatusBar style="light" />
       <ScrollView
-        contentContainerStyle={{ padding: 24, paddingBottom: 140 }}
+        contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="font-jakartaBold text-3xl font-bold text-inkNavy mb-1">
-          {technique.name}
-        </Text>
-        <Text className="font-inter text-sm text-driftGray mb-1">
-          {technique.tagline}
-        </Text>
-        <Text className="font-inter text-xs text-skyBlue font-bold uppercase mb-6">
-          {technique.intensity} · {technique.rounds} rounds
-        </Text>
-
-        <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
-          Benefits
-        </Text>
-        <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-6">
-          {technique.benefits.map((b, i) => (
-            <Text
-              key={i}
-              className="font-inter text-sm text-inkNavy mb-1 last:mb-0"
+        {/* Hero image — full bleed under the status bar, back button floats over it */}
+        <ImageBackground
+          source={{ uri: technique.imageUrl }}
+          style={{ width: "100%", height: 220 + insets.top }}
+          resizeMode="cover"
+        >
+          <LinearGradient
+            colors={["rgba(22,32,46,0.35)", "rgba(22,32,46,0)"]}
+            style={{ height: insets.top + 60, justifyContent: "flex-end" }}
+          >
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={10}
+              style={{
+                marginLeft: 20,
+                marginBottom: 12,
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "rgba(22,32,46,0.4)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              • {b}
-            </Text>
-          ))}
-        </View>
+              <ArrowLeft size={20} color="#FFFFFF" />
+            </Pressable>
+          </LinearGradient>
+        </ImageBackground>
 
-        <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
-          How to Practice
-        </Text>
-        <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-6">
-          {technique.howTo.map((step, i) => (
-            <Text
-              key={i}
-              className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
-            >
-              {i + 1}. {step}
-            </Text>
-          ))}
-        </View>
-
-        <View className="flex-row items-center mb-2">
-          <ShieldAlert size={16} color="#3E7EFF" />
-          <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
-            Precautions
+        <View style={{ padding: 24 }}>
+          <Text className="font-jakartaBold text-3xl font-bold text-inkNavy mb-1">
+            {technique.name}
           </Text>
-        </View>
-        <View className="bg-skyBlue/5 rounded-2xl p-4 border border-skyBlue/20 mb-6">
-          {technique.precautions.map((p, i) => (
-            <Text
-              key={i}
-              className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
-            >
-              • {p}
-            </Text>
-          ))}
-        </View>
-
-        <View className="flex-row items-center mb-2">
-          <AlertTriangle size={16} color="#FF7A59" />
-          <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
-            Warnings
+          <Text className="font-inter text-sm text-driftGray mb-1">
+            {technique.tagline}
           </Text>
-        </View>
-        <View className="bg-emberCoral/5 rounded-2xl p-4 border border-emberCoral/20">
-          {technique.warnings.map((w, i) => (
-            <Text
-              key={i}
-              className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
-            >
-              • {w}
+          <Text className="font-inter text-xs text-skyBlue font-bold uppercase mb-4">
+            {technique.intensity} · {technique.rounds} rounds
+          </Text>
+
+          <View className="flex-row flex-wrap gap-2 mb-6">
+            {technique.goodFor.map((tag) => (
+              <View key={tag} className="bg-skyBlue/10 rounded-full px-3 py-1">
+                <Text className="font-inter text-xs text-skyBlue font-bold">
+                  {tag}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
+            Benefits
+          </Text>
+          <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-6">
+            {technique.benefits.map((b, i) => (
+              <Text
+                key={i}
+                className="font-inter text-sm text-inkNavy mb-1 last:mb-0"
+              >
+                • {b}
+              </Text>
+            ))}
+          </View>
+
+          <Text className="font-jakartaBold text-base font-bold text-inkNavy mb-2">
+            How to Practice
+          </Text>
+          <View className="bg-cloudPanel rounded-2xl p-4 border border-hairline mb-6">
+            {technique.howTo.map((step, i) => (
+              <Text
+                key={i}
+                className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
+              >
+                {i + 1}. {step}
+              </Text>
+            ))}
+          </View>
+
+          <View className="flex-row items-center mb-2">
+            <ShieldAlert size={16} color="#3E7EFF" />
+            <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
+              Precautions
             </Text>
-          ))}
+          </View>
+          <View className="bg-skyBlue/5 rounded-2xl p-4 border border-skyBlue/20 mb-6">
+            {technique.precautions.map((p, i) => (
+              <Text
+                key={i}
+                className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
+              >
+                • {p}
+              </Text>
+            ))}
+          </View>
+
+          <View className="flex-row items-center mb-2">
+            <AlertTriangle size={16} color="#FF7A59" />
+            <Text className="font-jakartaBold text-base font-bold text-inkNavy ml-2">
+              Warnings
+            </Text>
+          </View>
+          <View className="bg-emberCoral/5 rounded-2xl p-4 border border-emberCoral/20">
+            {technique.warnings.map((w, i) => (
+              <Text
+                key={i}
+                className="font-inter text-sm text-inkNavy mb-2 last:mb-0"
+              >
+                • {w}
+              </Text>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 px-6 py-4 border-hairline mb-14">
+      <View className="absolute bottom-0 left-0 right-0 p-6  border-hairline">
         {locked ? (
           <Pressable
             onPress={() => router.push("/upgrade")}

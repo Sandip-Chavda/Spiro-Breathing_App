@@ -3,7 +3,7 @@ import { TECHNIQUES } from "@/data/techniques";
 import { useSessionStore } from "@/store/useSessionStore";
 import { Redirect, useRouter } from "expo-router";
 import { ArrowLeft, ChevronRight, Lock } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TechniquesScreen() {
@@ -26,22 +26,38 @@ export default function TechniquesScreen() {
       <Pressable
         key={t.id}
         onPress={() => router.push(`/technique/${t.id}`)}
-        className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row items-center mb-3"
+        className="bg-cloudPanel rounded-2xl border border-hairline mb-3 overflow-hidden flex-row"
       >
-        <View className="flex-1">
+        <Image
+          source={{ uri: t.imageUrl }}
+          style={{ width: 80, height: 80 }}
+          resizeMode="cover"
+        />
+        <View className="flex-1 p-3 justify-center">
           <View className="flex-row items-center">
             <Text className="font-jakartaBold text-base font-bold text-inkNavy">
               {t.name}
             </Text>
             {locked && (
-              <Lock size={14} color="#7C6FEF" style={{ marginLeft: 6 }} />
+              <Lock size={13} color="#7C6FEF" style={{ marginLeft: 6 }} />
             )}
           </View>
-          <Text className="font-inter text-xs text-driftGray mt-1">
+          <Text className="font-inter text-xs text-driftGray mt-0.5 mb-2">
             {t.tagline} · {t.intensity}
           </Text>
+          <View className="flex-row flex-wrap gap-1">
+            {t.goodFor.slice(0, 2).map((tag) => (
+              <View
+                key={tag}
+                className="bg-skyBlue/10 rounded-full px-2 py-0.5"
+              >
+                <Text className="font-inter text-[10px] text-skyBlue font-bold">
+                  {tag}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
-        <ChevronRight size={18} color="#77879B" />
       </Pressable>
     );
   };
