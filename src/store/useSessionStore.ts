@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getLocalDateString } from "@/utils/date";
 import { generateUUID } from "@/utils/uuid";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
@@ -50,6 +51,10 @@ interface SessionState {
 
   hydrateFromCloud: (userId: string) => Promise<void>;
   resetLocalState: () => void;
+
+  recoverStreak: () => void;
+
+  markDailyAttempt: () => void;
 }
 
 const DEFAULT_STATE = {
@@ -84,6 +89,25 @@ export const useSessionStore = create<SessionState>()(
           });
       },
 
+      // Free tier only: consumes today's single allowed attempt the moment a
+      // session STARTS, not just on completion. Without this, a free user could
+      // reset before finishing and retry indefinitely with zero tracking — this
+      // closes that gap while still only recording real history on completion.
+      markDailyAttempt: () => {
+        const today = getLocalDateString();
+        set({ lastActiveDate: today });
+        const userId = get().userId;
+        if (!userId) return;
+        supabase
+          .from("profiles")
+          .update({ last_active_date: today })
+          .eq("id", userId)
+          .then(({ error }) => {
+            if (error)
+              console.warn("markDailyAttempt sync failed:", error.message);
+          });
+      },
+
       setFullName: (name) => {
         set({ fullName: name });
         const userId = get().userId;
@@ -98,14 +122,12 @@ export const useSessionStore = create<SessionState>()(
       },
 
       addSession: (session) => {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateString();
         const state = get();
 
         let newStreak = state.currentStreak;
         if (state.lastActiveDate !== today) {
-          const yesterday = new Date(Date.now() - 86400000)
-            .toISOString()
-            .split("T")[0];
+          const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
           newStreak = state.lastActiveDate === yesterday ? newStreak + 1 : 1;
         }
 
@@ -207,12 +229,8 @@ export const useSessionStore = create<SessionState>()(
           });
       },
 
-      // Pro-only: clearing history used to also null out lastActiveDate,
-      // which accidentally bypassed the free-tier daily lock. Use
-      // deleteSession for individual removals on free tier instead.
-
       unlockBonusSession: () => {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateString();
         set({ bonusSessionDate: today });
         const userId = get().userId;
         if (!userId) return;
@@ -254,6 +272,26 @@ export const useSessionStore = create<SessionState>()(
           .eq("id", userId)
           .then(({ error }) => {
             if (error) console.warn("unlockPreset sync failed:", error.message);
+          });
+      },
+
+      // Bridges the gap by pretending yesterday was active — the next
+      // real session then naturally continues the existing streak count
+      // instead of resetting it. Payment/eligibility gating happens in
+      // the UI (StreakRecoveryBanner) before this is ever called; this
+      // action just performs the patch.
+      recoverStreak: () => {
+        const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
+        set({ lastActiveDate: yesterday });
+        const userId = get().userId;
+        if (!userId) return;
+        supabase
+          .from("profiles")
+          .update({ last_active_date: yesterday })
+          .eq("id", userId)
+          .then(({ error }) => {
+            if (error)
+              console.warn("recoverStreak sync failed:", error.message);
           });
       },
 

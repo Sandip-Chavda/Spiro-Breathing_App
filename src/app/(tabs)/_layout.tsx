@@ -1,8 +1,16 @@
 import { useAuth } from "@/context/AuthProvider";
+import { useUIStore } from "@/store/useUIStore";
 import { BlurView } from "expo-blur";
 import { Redirect, Tabs } from "expo-router";
 import { Home, User, Wind } from "lucide-react-native";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   withSpring,
@@ -10,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 // Custom Clean Tab Item with Active Background Glow
-const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
+const TabItem = ({ isFocused, label, iconName, onPress, disabled }: any) => {
   const animatedIconStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -41,7 +49,10 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
   const color = isFocused ? "#3E7EFF" : "#77879B";
 
   return (
-    <Pressable onPress={onPress} style={styles.tabItem}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.tabItem, disabled && { opacity: 0.35 }]}
+    >
       <View style={styles.contentWrapper}>
         <Animated.View style={[styles.activeBackground, animatedBgStyle]} />
         <Animated.View style={animatedIconStyle}>
@@ -55,6 +66,8 @@ const TabItem = ({ isFocused, label, iconName, onPress }: any) => {
 
 // The Custom Floating Glass Tab Bar
 const CustomTabBar = ({ state, navigation }: any) => {
+  const isSessionActive = useUIStore((s) => s.isSessionActive);
+
   return (
     <View style={styles.tabBarContainer}>
       <BlurView intensity={80} tint="light" style={styles.blurView}>
@@ -68,13 +81,21 @@ const CustomTabBar = ({ state, navigation }: any) => {
               profile: { label: "Profile", icon: "profile" },
             };
 
+            const isBlocked = isSessionActive && route.name !== "breathe";
+
             const onPress = () => {
+              if (isBlocked) {
+                Alert.alert(
+                  "Session in Progress",
+                  "Stop your current breathing session before switching screens.",
+                );
+                return;
+              }
               const event = navigation.emit({
                 type: "tabPress",
                 target: route.key,
                 canPreventDefault: true,
               });
-
               if (!isFocused && !event.defaultPrevented) {
                 navigation.navigate(route.name);
               }
@@ -87,6 +108,7 @@ const CustomTabBar = ({ state, navigation }: any) => {
                 label={config[route.name].label}
                 iconName={config[route.name].icon}
                 onPress={onPress}
+                disabled={isBlocked}
               />
             );
           })}
@@ -95,7 +117,6 @@ const CustomTabBar = ({ state, navigation }: any) => {
     </View>
   );
 };
-
 export default function TabsLayout() {
   const { session, loading } = useAuth();
 

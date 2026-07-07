@@ -1,17 +1,11 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
+import StreakRecoveryBanner from "@/components/StreakRecoveryBanner";
 import { supabase } from "@/lib/supabase";
 import { useSessionStore } from "@/store/useSessionStore";
+import { getLocalDateString } from "@/utils/date";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import {
-  AlertTriangle,
-  ChevronRight,
-  Clock,
-  Flame,
-  History,
-  Lock,
-  LogOut,
-} from "lucide-react-native";
+import { AlertTriangle, Clock, Flame, Lock, LogOut } from "lucide-react-native";
 import { useMemo } from "react";
 import {
   Alert,
@@ -27,10 +21,10 @@ import { ContributionGraph } from "react-native-chart-kit/v2";
 export default function ProfileScreen() {
   const sessions = useSessionStore((state) => state.sessions);
   const currentStreak = useSessionStore((state) => state.currentStreak);
-  const deleteSession = useSessionStore((state) => state.deleteSession);
   const userRole = useSessionStore((state) => state.userRole);
   const isPro = useSessionStore((state) => state.userRole) === "premium_tier";
-  const upgradeToPro = useSessionStore((state) => state.upgradeToPro);
+  const fullName = useSessionStore((state) => state.fullName);
+
   const router = useRouter();
 
   const dummyHeatmapValues = useMemo(() => {
@@ -40,7 +34,7 @@ export default function ProfileScreen() {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       data.push({
-        date: date.toISOString().slice(0, 10),
+        date: getLocalDateString(date),
         count: Math.floor(Math.random() * 15),
       });
     }
@@ -77,7 +71,7 @@ export default function ProfileScreen() {
     const map = new Map<string, number>();
 
     sessions.forEach((session) => {
-      const date = session.completedAt.split("T")[0];
+      const date = getLocalDateString(new Date(session.completedAt));
       const minutes = Math.round(session.durationSeconds / 60);
       map.set(date, (map.get(date) ?? 0) + minutes);
     });
@@ -152,17 +146,22 @@ export default function ProfileScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 24,
-          paddingTop: Platform.OS === "android" ? 40 : 20,
+          paddingTop: Platform.OS === "android" ? 10 : 20,
           paddingBottom: 140,
         }}
         showsVerticalScrollIndicator={false}
       >
         <Text className="font-jakartaBold text-3xl font-bold text-inkNavy">
-          Your Progress
+          <Text className="text-skyBlue">
+            {fullName ? `${fullName.split(" ")[0]}'s ` : "Your"}
+          </Text>
+          Progress
         </Text>
         <Text className="font-inter text-sm text-driftGray mt-1 mb-8">
           Track your parasympathetic consistency.
         </Text>
+
+        <StreakRecoveryBanner />
 
         <View className="flex-row gap-4 mb-8">
           <View className="flex-1 bg-cloudPanel rounded-2xl p-5 border border-hairline items-center">
@@ -295,7 +294,7 @@ export default function ProfileScreen() {
             </Text>
           </Pressable>
         )}
-
+        {/* 
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center">
             <History size={18} color="#77879B" strokeWidth={2.5} />
@@ -314,9 +313,9 @@ export default function ProfileScreen() {
               <ChevronRight size={14} color="#3E7EFF" />
             </Pressable>
           )}
-        </View>
+        </View> */}
 
-        {sessions.length === 0 ? (
+        {/* {sessions.length === 0 ? (
           <View className="bg-cloudPanel rounded-2xl p-8 border border-hairline items-center">
             <Text className="font-inter text-driftGray text-center">
               No sessions logged yet. Complete a breathing cycle to see your
@@ -346,7 +345,8 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-        )}
+        )} */}
+
         <Pressable
           onPress={handleSignOut}
           className="flex-row justify-center gap-2 mt-8 bg-skyBlue rounded-2xl py-4 items-center"

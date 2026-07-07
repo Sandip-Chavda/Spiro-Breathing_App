@@ -3,6 +3,8 @@ import FluidBreathingView from "@/components/FluidBreathingView";
 import { SafeAreaView } from "@/components/SafeAreaView";
 import { getTechniqueById } from "@/data/techniques";
 import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
+import { useUIStore } from "@/store/useUIStore";
+import { getLocalDateString } from "@/utils/date";
 import { generateUUID } from "@/utils/uuid";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -19,7 +21,10 @@ import {
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
+  BackHandler,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -99,9 +104,47 @@ export default function BreatheScreen() {
     (state) => state.deleteCustomRoutine,
   );
 
+  const setSessionActive = useUIStore((s) => s.setSessionActive);
+
+  useEffect(() => {
+    setSessionActive(hasStarted && !isComplete);
+  }, [hasStarted, isComplete]);
+
+  // Block Android hardware back button while a session is running
+  useEffect(() => {
+    const onBackPress = () => {
+      if (hasStarted && !isComplete) {
+        Alert.alert(
+          "Session in Progress",
+          "Stop your current session before leaving this screen.",
+        );
+        return true; // prevents default back navigation
+      }
+      return false;
+    };
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+    return () => subscription.remove();
+  }, [hasStarted, isComplete]);
+
+  useEffect(() => {
+    if (customRoutineId) {
+      const r = savedCustomRoutines.find((x) => x.id === customRoutineId);
+      if (r) handleSelectPattern(r);
+      return;
+    }
+    if (!techniqueId) return;
+    const t = getTechniqueById(techniqueId);
+    if (!t) return;
+    if (t.isPremium && !isPro) return;
+    handleSelectPattern(t);
+  }, [techniqueId, customRoutineId]);
+
   const isPro = userRole === "premium_tier";
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   const isLockedForToday = !isPro && lastActiveDate === today;
 
   const getActivePhases = (pattern: BreathingPattern): ActivePhase[] => {
@@ -207,6 +250,25 @@ export default function BreatheScreen() {
     phaseIndexRef.current = 0;
   };
 
+  const MIN_ROUNDS_FOR_CREDIT = 1;
+
+  // Manual early stop (Reset tapped mid-session, before finishing).
+  // If at least one full round completed, that's real, meaningful use —
+  // save it exactly like a normal completed session (addSession already
+  // updates the streak AND the daily-lock date on its own). Anything less
+  // is an accidental tap: no record, no penalty, free retry.
+  const handleStopEarly = () => {
+    if (currentRound >= MIN_ROUNDS_FOR_CREDIT && elapsedTime > 0) {
+      addSession({
+        id: generateUUID(),
+        patternName: activePattern.name,
+        completedAt: new Date().toISOString(),
+        durationSeconds: elapsedTime,
+      });
+    }
+    handleReset();
+  };
+
   const handleSelectPattern = (pattern: BreathingPattern) => {
     handleReset();
     let newPattern = { ...pattern };
@@ -299,7 +361,8 @@ export default function BreatheScreen() {
   return (
     <SafeAreaView
       className="flex-1 bg-mistWhite"
-      edges={["top", "left", "right"]}
+      style={{ paddingTop: Platform.OS === "android" ? 10 : 20 }}
+      edges={["left", "right"]}
     >
       <AmbientBackground phase={phase} />
 
@@ -418,7 +481,7 @@ export default function BreatheScreen() {
           <View className="flex-row items-center justify-center gap-8 mb-10">
             {hasStarted && !isComplete && (
               <Pressable
-                onPress={handleReset}
+                onPress={handleStopEarly}
                 className="w-16 h-16 rounded-full items-center justify-center bg-cloudPanel border border-hairline"
               >
                 <RotateCcw size={24} color="#77879B" />

@@ -1,6 +1,7 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
 import { TECHNIQUES } from "@/data/techniques";
 import { useSessionStore } from "@/store/useSessionStore";
+import { getLocalDateString } from "@/utils/date";
 import { useRouter } from "expo-router";
 import {
   ChevronRight,
@@ -23,7 +24,7 @@ const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function getWeekDates(): Date[] {
   const now = new Date();
-  const day = now.getDay(); // 0 = Sun
+  const day = now.getDay();
   const diffToMonday = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
   monday.setDate(now.getDate() + diffToMonday);
@@ -73,14 +74,14 @@ export default function HomeScreen() {
   const weekDates = useMemo(getWeekDates, []);
 
   const sessionDaySet = useMemo(
-    () => new Set(sessions.map((s) => s.completedAt.split("T")[0])),
+    () =>
+      new Set(sessions.map((s) => getLocalDateString(new Date(s.completedAt)))),
     [sessions],
   );
 
   const isToday = (d: Date) => d.toDateString() === new Date().toDateString();
 
-  const hasSessionOn = (d: Date) =>
-    sessionDaySet.has(d.toISOString().split("T")[0]);
+  const hasSessionOn = (d: Date) => sessionDaySet.has(getLocalDateString(d));
 
   const featuredTechnique = TECHNIQUES[0];
   const quickPicks = TECHNIQUES.slice(0, 4);
@@ -106,7 +107,6 @@ export default function HomeScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View>
             <Text className="text-2xl text-skyBlue font-jakartaBold">
@@ -124,7 +124,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Week strip — real session data, not decorative */}
         <View className="flex-row justify-between mb-8">
           {weekDates.map((d, i) => {
             const today = isToday(d);
@@ -160,7 +159,6 @@ export default function HomeScreen() {
           })}
         </View>
 
-        {/* Hero card + side card */}
         <View className="flex-row items-center justify-between mb-4">
           <Text className="font-jakartaBold text-lg font-bold text-inkNavy">
             Today's Focus
@@ -206,16 +204,12 @@ export default function HomeScreen() {
             <Text className="font-jakartaBold text-xl font-bold text-inkNavy mt-2">
               {currentStreak}
             </Text>
-            <Text
-              className="font-inter text-[10px] text-driftGray uppercase mt-1"
-              style={{ transform: [{ rotate: "0deg" }] }}
-            >
+            <Text className="font-inter text-[10px] text-driftGray uppercase mt-1">
               Streak
             </Text>
           </Pressable>
         </View>
 
-        {/* My Routines — Pro only */}
         {isPro && savedCustomRoutines.length > 0 && (
           <>
             <View className="flex-row items-center justify-between mb-4">
@@ -257,7 +251,6 @@ export default function HomeScreen() {
           </>
         )}
 
-        {/* Quick Start — horizontal pastel cards */}
         <View className="flex-row items-center justify-between mb-4">
           <Text className="font-jakartaBold text-lg font-bold text-inkNavy">
             Quick Start
@@ -301,7 +294,7 @@ export default function HomeScreen() {
             );
           })}
         </ScrollView>
-        {/* Daily Tip */}
+
         <View className="bg-skyBlue/5 border border-skyBlue/15 rounded-2xl p-4 mt-8 mb-8 flex-row items-start">
           <View className="w-9 h-9 rounded-full bg-skyBlue/15 items-center justify-center mr-3">
             <Lightbulb size={16} color="#3E7EFF" strokeWidth={2.5} />
@@ -316,7 +309,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Recent Sessions preview */}
         {sessions.length > 0 && (
           <>
             <View className="flex-row items-center justify-between mb-4">
@@ -358,7 +350,6 @@ export default function HomeScreen() {
           </>
         )}
 
-        {/* Explore banner */}
         <Pressable
           onPress={() => router.push("/techniques")}
           className="bg-inkNavy rounded-3xl p-6 flex-row items-center justify-between"
