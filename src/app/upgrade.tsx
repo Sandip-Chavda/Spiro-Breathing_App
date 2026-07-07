@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthProvider";
 import { useSessionStore } from "@/store/useSessionStore";
+import * as Haptics from "expo-haptics";
 import { Redirect, useRouter } from "expo-router";
 import {
   ArrowLeft,
@@ -147,7 +148,12 @@ export default function UpgradeScreen() {
       {!isPro && (
         <View className="absolute bottom-0 left-0 right-0 px-6 py-4  border-hairline mb-14">
           <Pressable
-            onPress={upgradeToPro}
+            onPress={() => {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              upgradeToPro();
+            }}
             className="bg-skyBlue rounded-2xl py-4 items-center"
             style={{
               shadowColor: "#3E7EFF",

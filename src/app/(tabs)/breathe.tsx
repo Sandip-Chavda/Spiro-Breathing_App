@@ -7,6 +7,7 @@ import { useUIStore } from "@/store/useUIStore";
 import { getLocalDateString } from "@/utils/date";
 import { generateUUID } from "@/utils/uuid";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Check,
@@ -232,10 +233,12 @@ export default function BreatheScreen() {
 
   const handlePlayPause = () => {
     if (isComplete) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       handleReset();
       setIsRunning(true);
       return;
     }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsRunning(!isRunning);
   };
 
@@ -258,6 +261,7 @@ export default function BreatheScreen() {
   // updates the streak AND the daily-lock date on its own). Anything less
   // is an accidental tap: no record, no penalty, free retry.
   const handleStopEarly = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentRound >= MIN_ROUNDS_FOR_CREDIT && elapsedTime > 0) {
       addSession({
         id: generateUUID(),
@@ -303,6 +307,7 @@ export default function BreatheScreen() {
 
   const adjustRounds = (delta: number) => {
     if (!isPro) return;
+    Haptics.selectionAsync();
     setActivePattern((prev) => ({
       ...prev,
       rounds: Math.max(1, prev.rounds + delta),

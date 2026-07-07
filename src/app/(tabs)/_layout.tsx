@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthProvider";
 import { useUIStore } from "@/store/useUIStore";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { Redirect, Tabs } from "expo-router";
 import { Home, User, Wind } from "lucide-react-native";
 import {
@@ -97,6 +98,7 @@ const CustomTabBar = ({ state, navigation }: any) => {
                 canPreventDefault: true,
               });
               if (!isFocused && !event.defaultPrevented) {
+                Haptics.selectionAsync();
                 navigation.navigate(route.name);
               }
             };

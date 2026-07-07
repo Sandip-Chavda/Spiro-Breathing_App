@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useSessionStore } from "@/store/useSessionStore";
 import { getLocalDateString } from "@/utils/date";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { AlertTriangle, Clock, Flame, Lock, LogOut } from "lucide-react-native";
 import { useMemo } from "react";
@@ -91,6 +92,7 @@ export default function ProfileScreen() {
         text: "Sign Out",
         style: "destructive",
         onPress: async () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           const { error } = await supabase.auth.signOut();
           if (error) console.warn("Sign out failed:", error.message);
         },
@@ -117,6 +119,9 @@ export default function ProfileScreen() {
                   text: "Delete Permanently",
                   style: "destructive",
                   onPress: async () => {
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Warning,
+                    );
                     const { error } = await supabase.rpc("delete_user");
                     if (error) {
                       console.warn("Account deletion failed:", error.message);
