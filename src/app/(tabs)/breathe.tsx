@@ -4,7 +4,9 @@ import HapticsModal from "@/components/HapticsSoundModal";
 import { SafeAreaView } from "@/components/SafeAreaView";
 import SoundModal from "@/components/SoundModal";
 import { getTechniqueById } from "@/data/techniques";
+import { usePhaseSounds } from "@/hooks/usePhaseSounds";
 import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { useUIStore } from "@/store/useUIStore";
 import { getLocalDateString } from "@/utils/date";
 import { haptics } from "@/utils/haptics";
@@ -113,6 +115,9 @@ export default function BreatheScreen() {
 
   const setSessionActive = useUIStore((s) => s.setSessionActive);
 
+  const { playInhale, playHold, playExhale, pauseAll } = usePhaseSounds();
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
+
   useEffect(() => {
     if (!isRunning) return;
     if (phase === "inhale") {
@@ -123,6 +128,13 @@ export default function BreatheScreen() {
       haptics.phaseExhale();
     }
   }, [phase]);
+
+  useEffect(() => {
+    if (!isRunning || !soundEnabled) return;
+    if (phase === "inhale") playInhale();
+    else if (phase === "holdIn" || phase === "holdOut") playHold();
+    else if (phase === "exhale") playExhale();
+  }, [phase, isRunning, soundEnabled]);
 
   useEffect(() => {
     setSessionActive(hasStarted && !isComplete);
@@ -241,6 +253,9 @@ export default function BreatheScreen() {
       setIsRunning(true);
       return;
     }
+    if (isRunning) {
+      pauseAll(); // stop any mid-flight phase sound on pause
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsRunning(!isRunning);
   };
@@ -264,6 +279,7 @@ export default function BreatheScreen() {
   // updates the streak AND the daily-lock date on its own). Anything less
   // is an accidental tap: no record, no penalty, free retry.
   const handleStopEarly = () => {
+    pauseAll();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentRound >= MIN_ROUNDS_FOR_CREDIT && elapsedTime > 0) {
       addSession({

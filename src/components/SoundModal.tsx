@@ -1,5 +1,7 @@
+import { usePhaseSounds } from "@/hooks/usePhaseSounds";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { Music, X } from "lucide-react-native";
+import { Music, Wind, X } from "lucide-react-native";
+import { useState } from "react";
 import { Modal, Pressable, Switch, Text, View } from "react-native";
 
 interface Props {
@@ -10,6 +12,18 @@ interface Props {
 export default function SoundModal({ visible, onClose }: Props) {
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const setSoundEnabled = useSettingsStore((s) => s.setSoundEnabled);
+  const { playInhale, playHold, playExhale } = usePhaseSounds();
+
+  const [isPlayingDemo, setIsPlayingDemo] = useState(false);
+
+  const playFullCycle = () => {
+    if (isPlayingDemo) return;
+    setIsPlayingDemo(true);
+    playInhale();
+    setTimeout(() => playHold(), 1200);
+    setTimeout(() => playExhale(), 2400);
+    setTimeout(() => setIsPlayingDemo(false), 3600);
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -39,15 +53,49 @@ export default function SoundModal({ visible, onClose }: Props) {
             />
           </View>
 
-          <View className="bg-cloudPanel/60 border border-hairline rounded-2xl p-6 items-center">
-            <Music size={28} color="#B8C2D1" />
-            <Text className="font-jakartaBold text-sm font-bold text-driftGray mt-3">
-              Sound cues coming soon
-            </Text>
-            <Text className="font-inter text-xs text-driftGray text-center mt-1">
-              Gentle audio tones for inhale, hold, and exhale are on the way.
-            </Text>
+          <Text className="font-inter text-xs text-driftGray mb-3">
+            Try each tone below — a soft rising chime for inhale, a sustained
+            tone for hold, a falling tone for exhale.
+          </Text>
+
+          <View className="flex-row gap-2 mb-3">
+            <Pressable
+              onPress={playInhale}
+              className="flex-1 bg-skyBlue/10 border border-skyBlue/20 rounded-xl py-3 items-center"
+            >
+              <Text className="font-jakartaBold text-xs font-bold text-skyBlue">
+                Hear Inhale
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={playHold}
+              className="flex-1 bg-duskViolet/10 border border-duskViolet/20 rounded-xl py-3 items-center"
+            >
+              <Text className="font-jakartaBold text-xs font-bold text-duskViolet">
+                Hear Hold
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={playExhale}
+              className="flex-1 bg-emberCoral/10 border border-emberCoral/20 rounded-xl py-3 items-center"
+            >
+              <Text className="font-jakartaBold text-xs font-bold text-emberCoral">
+                Hear Exhale
+              </Text>
+            </Pressable>
           </View>
+
+          <Pressable
+            onPress={playFullCycle}
+            disabled={isPlayingDemo}
+            className="bg-inkNavy rounded-xl py-3 items-center flex-row justify-center"
+            style={{ opacity: isPlayingDemo ? 0.6 : 1 }}
+          >
+            <Wind size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text className="font-jakartaBold text-sm font-bold text-cloudPanel">
+              {isPlayingDemo ? "Playing…" : "Play Full Cycle"}
+            </Text>
+          </Pressable>
         </View>
       </View>
     </Modal>
