@@ -1,6 +1,8 @@
 import AmbientBackground from "@/components/AmbientBackground";
 import FluidBreathingView from "@/components/FluidBreathingView";
+import HapticsModal from "@/components/HapticsSoundModal";
 import { SafeAreaView } from "@/components/SafeAreaView";
+import SoundModal from "@/components/SoundModal";
 import { getTechniqueById } from "@/data/techniques";
 import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
 import { useUIStore } from "@/store/useUIStore";
@@ -14,11 +16,13 @@ import {
   Check,
   Lock,
   Minus,
+  Music,
   Play,
   Plus,
   RotateCcw,
   Settings,
   Square,
+  Vibrate,
   X,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -78,7 +82,6 @@ export default function BreatheScreen() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentRound, setCurrentRound] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
-
   const [activePattern, setActivePattern] =
     useState<BreathingPattern>(DEFAULT_PATTERN);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -90,6 +93,8 @@ export default function BreatheScreen() {
     holdOut: "4",
     rounds: "20",
   });
+  const [isHapticsModalVisible, setIsHapticsModalVisible] = useState(false);
+  const [isSoundModalVisible, setIsSoundModalVisible] = useState(false);
 
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -167,20 +172,6 @@ export default function BreatheScreen() {
     if (pattern.holdOut > 0) arr.push("holdOut");
     return arr;
   };
-
-  // Load a technique or saved custom routine passed in via navigation params
-  useEffect(() => {
-    if (customRoutineId) {
-      const r = savedCustomRoutines.find((x) => x.id === customRoutineId);
-      if (r) handleSelectPattern(r);
-      return;
-    }
-    if (!techniqueId) return;
-    const t = getTechniqueById(techniqueId);
-    if (!t) return;
-    if (t.isPremium && !isPro) return; // safety guard
-    handleSelectPattern(t);
-  }, [techniqueId, customRoutineId]);
 
   useEffect(() => {
     if (isComplete && elapsedTime > 0) {
@@ -382,6 +373,23 @@ export default function BreatheScreen() {
       edges={["left", "right"]}
     >
       <AmbientBackground phase={phase} />
+
+      {!hasStarted && (
+        <View className="absolute gap-4 bottom-35 right-6 z-20 items-center justify-cente">
+          <Pressable
+            onPress={() => setIsHapticsModalVisible(true)}
+            className="w-14 h-14 rounded-full bg-cloudPanel border border-hairline items-center justify-center"
+          >
+            <Vibrate size={22} color="#3E7EFF" />
+          </Pressable>
+          <Pressable
+            onPress={() => setIsSoundModalVisible(true)}
+            className="w-14 h-14 rounded-full bg-cloudPanel border border-hairline items-center justify-center"
+          >
+            <Music size={22} color="#3E7EFF" />
+          </Pressable>
+        </View>
+      )}
 
       <View className="flex-1 items-center justify-between pt-8 pb-32 px-6 relative z-10">
         <View className="w-full items-center mt-4">
@@ -800,6 +808,15 @@ export default function BreatheScreen() {
           </View>
         </View>
       </Modal>
+
+      <HapticsModal
+        visible={isHapticsModalVisible}
+        onClose={() => setIsHapticsModalVisible(false)}
+      />
+      <SoundModal
+        visible={isSoundModalVisible}
+        onClose={() => setIsSoundModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

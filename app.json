@@ -28,10 +28,6 @@
       "backgroundColor": "#F6F8FB",
       "translucent": true
     },
-    "androidNavigationBar": {
-      "barStyle": "dark-content",
-      "backgroundColor": "#F6F8FB"
-    },
     "plugins": [
       "expo-router",
       [
