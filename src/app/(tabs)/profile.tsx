@@ -2,11 +2,19 @@ import { SafeAreaView } from "@/components/SafeAreaView";
 import StreakRecoveryBanner from "@/components/StreakRecoveryBanner";
 import { supabase } from "@/lib/supabase";
 import { useSessionStore } from "@/store/useSessionStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { getLocalDateString } from "@/utils/date";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { AlertTriangle, Clock, Flame, Lock, LogOut } from "lucide-react-native";
+import {
+  AlertTriangle,
+  Clock,
+  Flame,
+  Lock,
+  LogOut,
+  Vibrate,
+} from "lucide-react-native";
 import { useMemo } from "react";
 import {
   Alert,
@@ -14,6 +22,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Switch,
   Text,
   View,
 } from "react-native";
@@ -25,6 +34,12 @@ export default function ProfileScreen() {
   const userRole = useSessionStore((state) => state.userRole);
   const isPro = useSessionStore((state) => state.userRole) === "premium_tier";
   const fullName = useSessionStore((state) => state.fullName);
+  const breathingHapticsEnabled = useSettingsStore(
+    (s) => s.breathingHapticsEnabled,
+  );
+  const setBreathingHapticsEnabled = useSettingsStore(
+    (s) => s.setBreathingHapticsEnabled,
+  );
 
   const router = useRouter();
 
@@ -351,6 +366,21 @@ export default function ProfileScreen() {
             ))}
           </View>
         )} */}
+
+        <View className="flex-row items-center justify-between bg-cloudPanel rounded-2xl p-4 border border-hairline mb-4">
+          <View className="flex-row items-center">
+            <Vibrate size={18} color="#77879B" strokeWidth={2.5} />
+            <Text className="font-jakartaBold text-sm font-bold text-inkNavy ml-3">
+              Breathing Vibration
+            </Text>
+          </View>
+          <Switch
+            value={breathingHapticsEnabled}
+            onValueChange={setBreathingHapticsEnabled}
+            trackColor={{ false: "#E3E9F1", true: "#3E7EFF" }}
+            thumbColor="#FFFFFF"
+          />
+        </View>
 
         <Pressable
           onPress={handleSignOut}

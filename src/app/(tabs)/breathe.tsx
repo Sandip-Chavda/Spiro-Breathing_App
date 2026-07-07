@@ -5,6 +5,7 @@ import { getTechniqueById } from "@/data/techniques";
 import { BreathingPattern, useSessionStore } from "@/store/useSessionStore";
 import { useUIStore } from "@/store/useUIStore";
 import { getLocalDateString } from "@/utils/date";
+import { haptics } from "@/utils/haptics";
 import { generateUUID } from "@/utils/uuid";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -106,6 +107,17 @@ export default function BreatheScreen() {
   );
 
   const setSessionActive = useUIStore((s) => s.setSessionActive);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    if (phase === "inhale") {
+      haptics.phaseInhale();
+    } else if (phase === "holdIn" || phase === "holdOut") {
+      haptics.phaseHold();
+    } else if (phase === "exhale") {
+      haptics.phaseExhale();
+    }
+  }, [phase]);
 
   useEffect(() => {
     setSessionActive(hasStarted && !isComplete);
