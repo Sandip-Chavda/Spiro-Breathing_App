@@ -1,24 +1,31 @@
 import { SafeAreaView } from "@/components/SafeAreaView";
+import SettingsRow from "@/components/SettingsRow";
 import StreakRecoveryBanner from "@/components/StreakRecoveryBanner";
 import { supabase } from "@/lib/supabase";
 import { useSessionStore } from "@/store/useSessionStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { getLocalDateString } from "@/utils/date";
 import { BlurView } from "expo-blur";
+import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import {
   AlertTriangle,
   Clock,
+  FileText,
   Flame,
+  Info,
   Lock,
   LogOut,
+  Mail,
+  ShieldCheck,
   Vibrate,
 } from "lucide-react-native";
 import { useMemo } from "react";
 import {
   Alert,
   Dimensions,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -27,6 +34,8 @@ import {
   View,
 } from "react-native";
 import { ContributionGraph } from "react-native-chart-kit/v2";
+
+const SUPPORT_EMAIL = "support@yourdomain.com"; // TODO: replace with your real support address
 
 export default function ProfileScreen() {
   const sessions = useSessionStore((state) => state.sessions);
@@ -68,30 +77,13 @@ export default function ProfileScreen() {
     return `${secs}sec`;
   };
 
-  const formatSessionTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
-  };
-
-  const formatDate = (isoString: string) => {
-    const date = new Date(isoString);
-    return (
-      date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
-      " • " +
-      date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-    );
-  };
-
   const heatmapValues = useMemo(() => {
     const map = new Map<string, number>();
-
     sessions.forEach((session) => {
       const date = getLocalDateString(new Date(session.completedAt));
       const minutes = Math.round(session.durationSeconds / 60);
       map.set(date, (map.get(date) ?? 0) + minutes);
     });
-
     return Array.from(map.entries()).map(([date, count]) => ({
       date,
       count: Math.round(count),
@@ -99,6 +91,7 @@ export default function ProfileScreen() {
   }, [sessions]);
 
   const chartWidth = Dimensions.get("window").width - 72;
+  const appVersion = Constants.expoConfig?.version ?? "1.0.0";
 
   const handleSignOut = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -155,6 +148,10 @@ export default function ProfileScreen() {
         },
       ],
     );
+  };
+
+  const handleContactSupport = () => {
+    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Spiro Support`);
   };
 
   return (
@@ -307,112 +304,106 @@ export default function ProfileScreen() {
         {!isPro && (
           <Pressable
             onPress={() => router.push("/upgrade")}
-            className="bg-duskViolet rounded-2xl py-4 px-8 w-full items-center mb-8"
+            className="bg-duskViolet rounded-2xl py-4 px-8 w-full items-center mb-10"
           >
             <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
               View Plans
             </Text>
           </Pressable>
         )}
-        {/* 
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="flex-row items-center">
-            <History size={18} color="#77879B" strokeWidth={2.5} />
-            <Text className="font-jakartaBold text-lg font-bold text-inkNavy ml-2">
-              History Log
-            </Text>
-          </View>
-          {sessions.length > 3 && (
-            <Pressable
-              onPress={() => router.push("/history")}
-              className="flex-row items-center"
-            >
-              <Text className="font-jakartaBold text-xs font-bold text-skyBlue">
-                View All
+
+        {/* Account */}
+        <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
+          Account
+        </Text>
+        <View className="bg-cloudPanel rounded-2xl border border-hairline mb-6 overflow-hidden">
+          <View className="flex-row items-center px-4 py-4 border-b border-hairline">
+            <View className="w-11 h-11 rounded-full bg-skyBlue items-center justify-center mr-3">
+              <Text className="font-jakartaBold text-base font-bold text-cloudPanel">
+                {fullName ? fullName.charAt(0).toUpperCase() : "?"}
               </Text>
-              <ChevronRight size={14} color="#3E7EFF" />
-            </Pressable>
-          )}
-        </View> */}
-
-        {/* {sessions.length === 0 ? (
-          <View className="bg-cloudPanel rounded-2xl p-8 border border-hairline items-center">
-            <Text className="font-inter text-driftGray text-center">
-              No sessions logged yet. Complete a breathing cycle to see your
-              history here!
-            </Text>
+            </View>
+            <View>
+              <Text className="font-jakartaBold text-sm font-bold text-inkNavy">
+                {fullName ?? "Spiro User"}
+              </Text>
+              <Text className="font-inter text-xs text-driftGray mt-0.5">
+                {isPro ? "Pro Member" : "Free Member"}
+              </Text>
+            </View>
           </View>
-        ) : (
-          <View className="gap-3">
-            {sessions.slice(0, 3).map((session) => (
-              <View
-                key={session.id}
-                className="bg-cloudPanel rounded-2xl p-4 border border-hairline flex-row justify-between items-center"
-              >
-                <View className="flex-1">
-                  <Text className="font-jakartaBold text-base font-bold text-inkNavy">
-                    {session.patternName}
-                  </Text>
-                  <Text className="font-inter text-xs text-driftGray mt-1">
-                    {formatDate(session.completedAt)}
-                  </Text>
-                </View>
-                <View className="bg-mistWhite px-3 py-2 rounded-lg mr-3">
-                  <Text className="font-jakartaBold text-sm font-bold text-skyBlue">
-                    {formatSessionTime(session.durationSeconds)}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )} */}
-
-        <View className="flex-row items-center justify-between bg-cloudPanel rounded-2xl p-4 border border-hairline mb-4">
-          <View className="flex-row items-center">
-            <Vibrate size={18} color="#77879B" strokeWidth={2.5} />
-            <Text className="font-jakartaBold text-sm font-bold text-inkNavy ml-3">
-              Breathing Vibration
-            </Text>
-          </View>
-          <Switch
-            value={breathingHapticsEnabled}
-            onValueChange={setBreathingHapticsEnabled}
-            trackColor={{ false: "#E3E9F1", true: "#3E7EFF" }}
-            thumbColor="#FFFFFF"
+          <SettingsRow
+            icon={LogOut}
+            label="Sign Out"
+            onPress={handleSignOut}
+            isLast
           />
         </View>
 
+        {/* Preferences */}
+        <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
+          Preferences
+        </Text>
+        <View className="bg-cloudPanel rounded-2xl border border-hairline mb-6">
+          <View className="flex-row items-center justify-between px-4 py-3.5">
+            <View className="flex-row items-center">
+              <View className="w-8 h-8 rounded-lg bg-skyBlue/10 items-center justify-center mr-3">
+                <Vibrate size={16} color="#3E7EFF" strokeWidth={2.2} />
+              </View>
+              <Text className="font-inter text-sm text-inkNavy">
+                Breathing Vibration
+              </Text>
+            </View>
+            <Switch
+              value={breathingHapticsEnabled}
+              onValueChange={setBreathingHapticsEnabled}
+              trackColor={{ false: "#E3E9F1", true: "#3E7EFF" }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+        </View>
+
+        {/* Support & Legal */}
+        <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
+          Support & Legal
+        </Text>
+        <View className="bg-cloudPanel rounded-2xl border border-hairline mb-6 overflow-hidden">
+          <SettingsRow
+            icon={Mail}
+            label="Contact Support"
+            onPress={handleContactSupport}
+          />
+          <SettingsRow
+            icon={ShieldCheck}
+            label="Privacy Policy"
+            onPress={() => router.push("/privacy-policy")}
+          />
+          <SettingsRow
+            icon={FileText}
+            label="Terms of Use"
+            onPress={() => router.push("/terms-of-use")}
+          />
+          <SettingsRow
+            icon={Info}
+            label="App Version"
+            rightLabel={appVersion}
+            isLast
+          />
+        </View>
+
+        {/* Danger Zone */}
+        <Text className="font-inter text-xs text-emberCoral uppercase mb-3 text-center mt-4">
+          Danger Zone
+        </Text>
         <Pressable
-          onPress={handleSignOut}
-          className="flex-row justify-center gap-2 mt-8 bg-skyBlue rounded-2xl py-4 items-center"
-          style={{
-            shadowColor: "#3E7EFF",
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.25,
-            shadowRadius: 16,
-            elevation: 6,
-          }}
+          onPress={handleDeleteAccount}
+          className="flex-row items-center justify-center gap-2 bg-emberCoral/5 border border-emberCoral/20 rounded-2xl py-4"
         >
-          <LogOut size={16} color="#ffffff" />
-          <Text className="font-jakartaBold text-base font-bold text-cloudPanel">
-            Sign Out
+          <AlertTriangle size={16} color="#FF7A59" />
+          <Text className="font-jakartaBold text-sm font-bold text-emberCoral">
+            Delete Account
           </Text>
         </Pressable>
-
-        <View className="mt-10 pt-6 border-t border-emberCoral">
-          <Text className="font-inter text-xs text-emberCoral uppercase mb-3 text-center">
-            Danger Zone
-          </Text>
-          <Pressable
-            onPress={handleDeleteAccount}
-            className="flex-row items-center justify-center gap-2 bg-emberCoral/5 border border-emberCoral/20 rounded-2xl py-4"
-          >
-            <AlertTriangle size={16} color="#FF7A59" />
-            <Text className="font-jakartaBold text-sm font-bold text-emberCoral">
-              Delete Account
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
