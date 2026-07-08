@@ -27,22 +27,31 @@ export default function TechniquesScreen() {
         key={t.id}
         onPress={() => router.push(`/technique/${t.id}`)}
         className="bg-cloudPanel rounded-2xl border border-hairline mb-3 overflow-hidden flex-row"
+        style={{ height: 104 }}
       >
-        <Image
-          source={{ uri: t.imageUrl }}
-          style={{ width: 80, height: 80 }}
-          resizeMode="cover"
-        />
+        <View style={{ width: 104 }}>
+          <Image
+            source={{ uri: t.imageUrl }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+          />
+        </View>
         <View className="flex-1 p-3 justify-center">
           <View className="flex-row items-center">
-            <Text className="font-jakartaBold text-base font-bold text-inkNavy">
+            <Text
+              className="font-jakartaBold text-base font-bold text-inkNavy"
+              numberOfLines={1}
+            >
               {t.name}
             </Text>
             {locked && (
               <Lock size={13} color="#7C6FEF" style={{ marginLeft: 6 }} />
             )}
           </View>
-          <Text className="font-inter text-xs text-driftGray mt-0.5 mb-2">
+          <Text
+            className="font-inter text-xs text-driftGray mt-0.5 mb-2"
+            numberOfLines={1}
+          >
             {t.tagline} · {t.intensity}
           </Text>
           <View className="flex-row flex-wrap gap-1">
