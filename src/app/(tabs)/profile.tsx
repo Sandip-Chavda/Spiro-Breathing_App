@@ -11,13 +11,16 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import {
   AlertTriangle,
+  ChevronRight,
   Clock,
+  Crown,
   FileText,
   Flame,
   Info,
   Lock,
   LogOut,
   Mail,
+  Music,
   ShieldCheck,
   Vibrate,
 } from "lucide-react-native";
@@ -29,13 +32,12 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Switch,
   Text,
   View,
 } from "react-native";
 import { ContributionGraph } from "react-native-chart-kit/v2";
 
-const SUPPORT_EMAIL = "support@yourdomain.com"; // TODO: replace with your real support address
+const SUPPORT_EMAIL = "support@yourdomain.com";
 
 export default function ProfileScreen() {
   const sessions = useSessionStore((state) => state.sessions);
@@ -49,6 +51,8 @@ export default function ProfileScreen() {
   const setBreathingHapticsEnabled = useSettingsStore(
     (s) => s.setBreathingHapticsEnabled,
   );
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
+  const setSoundEnabled = useSettingsStore((s) => s.setSoundEnabled);
 
   const router = useRouter();
 
@@ -301,17 +305,6 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {!isPro && (
-          <Pressable
-            onPress={() => router.push("/upgrade")}
-            className="bg-duskViolet rounded-2xl py-4 px-8 w-full items-center mb-10"
-          >
-            <Text className="font-jakartaBold text-lg font-bold text-cloudPanel">
-              View Plans
-            </Text>
-          </Pressable>
-        )}
-
         {/* Account */}
         <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
           Account
@@ -332,6 +325,28 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </View>
+
+          {/* Premium upsell — blue, matches app palette, distinct call-to-action feel within the row */}
+          {!isPro && (
+            <Pressable
+              onPress={() => router.push("/upgrade")}
+              className="flex-row items-center px-4 py-4 bg-skyBlue/5 border-b border-hairline"
+            >
+              <View className="w-8 h-8 rounded-lg bg-skyBlue items-center justify-center mr-3">
+                <Crown size={16} color="#FFFFFF" strokeWidth={2.2} />
+              </View>
+              <Text className="font-jakartaBold text-sm font-bold text-skyBlue flex-1">
+                Upgrade to Premium
+              </Text>
+              <View className="bg-skyBlue rounded-full px-2.5 py-1 mr-2">
+                <Text className="font-jakartaBold text-[10px] font-bold text-cloudPanel">
+                  PRO
+                </Text>
+              </View>
+              <ChevronRight size={16} color="#3E7EFF" />
+            </Pressable>
+          )}
+
           <SettingsRow
             icon={LogOut}
             label="Sign Out"
@@ -344,23 +359,20 @@ export default function ProfileScreen() {
         <Text className="font-jakarta text-sm text-driftGray uppercase mb-3">
           Preferences
         </Text>
-        <View className="bg-cloudPanel rounded-2xl border border-hairline mb-6">
-          <View className="flex-row items-center justify-between px-4 py-3.5">
-            <View className="flex-row items-center">
-              <View className="w-8 h-8 rounded-lg bg-skyBlue/10 items-center justify-center mr-3">
-                <Vibrate size={16} color="#3E7EFF" strokeWidth={2.2} />
-              </View>
-              <Text className="font-inter text-sm text-inkNavy">
-                Breathing Vibration
-              </Text>
-            </View>
-            <Switch
-              value={breathingHapticsEnabled}
-              onValueChange={setBreathingHapticsEnabled}
-              trackColor={{ false: "#E3E9F1", true: "#3E7EFF" }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
+        <View className="bg-cloudPanel rounded-2xl border border-hairline mb-6 overflow-hidden">
+          <SettingsRow
+            icon={Vibrate}
+            label="Breathing Vibration Guide"
+            toggleValue={breathingHapticsEnabled}
+            onToggleChange={setBreathingHapticsEnabled}
+          />
+          <SettingsRow
+            icon={Music}
+            label="Breathing Sound Guide"
+            toggleValue={soundEnabled}
+            onToggleChange={setSoundEnabled}
+            isLast
+          />
         </View>
 
         {/* Support & Legal */}

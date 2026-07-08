@@ -259,7 +259,7 @@ function BreathPreviewScreen() {
             />
           </View>
           {/* Notch */}
-          <View
+          {/* <View
             style={{
               position: "absolute",
               top: 7,
@@ -269,7 +269,7 @@ function BreathPreviewScreen() {
               borderRadius: 9,
               backgroundColor: "#16202E",
             }}
-          />
+          /> */}
         </View>
       </View>
 
