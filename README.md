@@ -7,9 +7,9 @@
   Replace the line below with your app banner/poster image.
   Recommended size: 1280x640 (2:1), stored at e.g. /assets/readme/banner.png
 -->
-<p align="center">
+<!-- <p align="center">
   <img src="./assets/readme/SpiroGithubBanner.png" alt="Spiro banner" width="100%" />
-</p>
+</p> -->
 
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white" />
@@ -28,11 +28,11 @@
   Alternatively, embed a YouTube thumbnail that links out to the full demo.
 -->
 
-## 🎬 Demo Video
+## 🎬 Demo Video (Click Below)
 
 <p align="center">
-  <a href="REPLACE_WITH_YOUTUBE_OR_DEMO_LINK">
-    <img src="./assets/readme/demo-thumbnail.png" alt="Will be Added Soon" width="70%" />
+  <a href="https://youtu.be/229XJIRzjNg" target="_blank">
+    <img src="./assets/readme/SpiroGithubBanner.png" alt="Spiro Demo Video" width="90%" />
   </a>
 </p>
 
