@@ -8,7 +8,7 @@
   Recommended size: 1280x640 (2:1), stored at e.g. /assets/readme/banner.png
 -->
 <p align="center">
-  <img src="./assets/readme/banner.png" alt="Spiro banner" width="100%" />
+  <img src="./assets/readme/SpiroGithubBanner.png" alt="Spiro banner" width="100%" />
 </p>
 
 <p align="center">
@@ -53,12 +53,27 @@ Built to be fully functional in **Expo Go** during development, with native-only
   Replace each placeholder below with actual screenshots.
   Recommended: consistent device frame, same phone/resolution across all.
 -->
+
+<p align="">
+  <img src="./assets/readme/Onboard1.jpg" width="19%" />
+  <img src="./assets/readme/Onboard2.jpg" width="19%" />
+  <img src="./assets/readme/Onboard3.jpg" width="19%" />
+  <img src="./assets/readme/Login.jpg" width="19%" />
+</p>
+
 <p align="center">
-  <img src="./assets/readme/screenshot-onboarding.png" width="19%" />
-  <img src="./assets/readme/screenshot-home.png" width="19%" />
-  <img src="./assets/readme/screenshot-breathe.png" width="19%" />
-  <img src="./assets/readme/screenshot-techniques.png" width="19%" />
-  <img src="./assets/readme/screenshot-profile.png" width="19%" />
+  <img src="./assets/readme/Home.jpg" width="19%" />
+  <img src="./assets/readme/Breath.jpg" width="19%" />
+  <img src="./assets/readme/Profile.jpg" width="19%" />
+  <img src="./assets/readme/ExerciseDetails.jpg" width="19%" />
+  <img src="./assets/readme/ExerciseList.jpg" width="19%" />
+</p>
+
+<p align="">
+  <img src="./assets/readme/CustomeRoutine.jpg" width="19%" />
+  <img src="./assets/readme/History.jpg" width="19%" />
+  <img src="./assets/readme/Membership.jpg" width="19%" />
+  <img src="./assets/readme/Sound&Vibrations.jpg" width="19%" />
 </p>
 
 ---
